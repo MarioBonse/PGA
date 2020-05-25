@@ -8,6 +8,16 @@ int find(std::vector<int> candidates, int node){
     return 0;
 }
 
+std::vector<int> find_candidates(std::vector<int> nodes, std::vector<bool> visited){
+    std::vector<int> candidates;
+    for(int i = 0; i<nodes.size(); i++){
+        // if the edge exists and we never visited it 
+        if(nodes[i] && !visited[i]){
+            candidates.push_back(i);
+        }
+    }
+    return candidates;
+}
 
 int next_random_node(std::vector<int> nodes, std::vector<bool> visited){
     
@@ -22,19 +32,10 @@ int next_random_node(std::vector<int> nodes, std::vector<bool> visited){
     return candidates[rand_index];
 }
 
-std::vector<int> find_candidates(std::vector<int> nodes, std::vector<bool> visited){
-    std::vector<int> candidates;
-    for(int i = 0; i<nodes.size(); i++){
-        // if the edge exists and we never visited it 
-        if(nodes[i] && !visited[i]){
-            candidates.push_back(i);
-        }
-    }
-    return candidates;
-}
 
-pga::TSPAgent::TSPAgent(std::vector<std::vector<int>> graph){
-    graph = graph;
+
+pga::TSPAgent::TSPAgent(std::vector<std::vector<int>> const my_graph){
+    graph = my_graph;
     size = graph.size();
     chromosome_length = size/2;
     random_DNA();
@@ -111,7 +112,7 @@ void pga::TSPAgent::reproduce(TSPAgent p1, TSPAgent p2){
             // find from start a "free node" and pick the first one present in p2
             std::vector<int> candidates = find_candidates(graph[start], visited);
             // if I have no possible nodes then the agent is dead then the fitness is 0
-            if(candidates.size() == 0){{DNA[i] = -1; alive = false; return;}
+            if(candidates.size() == 0){DNA[i] = -1; alive = false; return;}
 
             int DNA2_index = 0;
             // increase the index of DNA2 until we find a node never visited 
@@ -129,4 +130,8 @@ void pga::TSPAgent::reproduce(TSPAgent p1, TSPAgent p2){
             }    
         }
     }
+}
+
+pga::TSPAgent::~TSPAgent(){
+    std::cout<<"destroy_agent";
 }

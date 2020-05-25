@@ -11,7 +11,7 @@ template <class T> void pga::population<T>::normalize(){
         cumsum+=a.fitness;
     }
     for(auto a: current_population){
-        a.fitness = a.fitness/cumsum;
+        a.probability = double(a.fitness)/double(cumsum);
     }
 }
  
@@ -48,10 +48,10 @@ template <class T> void pga::population<T>::simulate(){
     sort();
     normalize();
 
-    for(int i = 0; i<number_agent; i++){
-        int index1 = pick_random_parent());
+    for(int i = 0; i<current_population.size(); i++){
+        int index1 = pick_random_parent();
         int index2 = pick_random_parent();
-        new_population[i].reproduce(agents[index1], agents[index2]);
+        new_population[i].reproduce(current_population[index1], current_population[index2]);
     }
     std::swap(current_population, new_population);
 }
@@ -72,5 +72,5 @@ template <class T> void pga::population<T>::add_agent(T &a){
     T new_agent1 = a;
     T new_agent2 = a;
     current_population.push_back(new_agent1);
-    new_population.push_back(new_agent12);
+    new_population.push_back(new_agent2);
 }
