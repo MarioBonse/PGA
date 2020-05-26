@@ -86,7 +86,7 @@ Pick pieces of the first DNA (e.d. 1-4-5-*-*-*-7-8)
 then complete with * with nodes from p2 in order if possible -> 6-3-2.
 With probability p_mutation one node of the path(aka a chromosome of the DNA) is picked randomly 
 */
-void pga::TSPAgent::reproduce(TSPAgent p1, TSPAgent p2){
+void pga::TSPAgent::reproduce(pga::TSPAgent p1, pga::TSPAgent p2){
     std::vector<bool> visited(0, size);
     int start = DNA[0];
 

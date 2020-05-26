@@ -17,7 +17,7 @@ namespace pga{
         std::vector<T> new_population;
         
         public:
-        population();
+        //population();
 
         void normalize();
 
@@ -29,7 +29,7 @@ namespace pga{
 
         T best_agent(); //return the best agent from the previus simulation
 
-        virtual void simulate();
+        void simulate();
 
     };
 }

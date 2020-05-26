@@ -1,11 +1,12 @@
 #include "population.h"
 
 
-template <class T> pga::population<T>::population(){  
-    std::cout<<"create new population\n";
-}
+// template <class T> pga::population<T>::population(){  
+//     std::cout<<"create new population\n";
+// }
 
-template <class T> void pga::population<T>::normalize(){
+template <class T> 
+void pga::population<T>::normalize(){
     T cumsum = 0.0;
     for(auto a: current_population){
         cumsum+=a.fitness;
@@ -20,7 +21,8 @@ template <class T> void pga::population<T>::normalize(){
 sample one parent with probability 
 proportional to the fitness
 */
-template <class T> int pga::population<T>::pick_random_parent(){
+template <class T> 
+int pga::population<T>::pick_random_parent(){
     double sample = dis(gen);
     double cum_sum = 0;
     int index = -1;
@@ -39,7 +41,8 @@ One step of simulation.
 3) sample two parents with probability proportional to the fitness
 4) create the new pool of agent
 */
-template <class T> void pga::population<T>::simulate(){
+template <class T> 
+void pga::population<T>::simulate(){
     for(auto a: current_population){
         a.simulate();
     }
@@ -59,7 +62,8 @@ template <class T> void pga::population<T>::simulate(){
 /*
 Returns the best agent until now 
 */
-template <class T> T pga::population<T>::best_agent(){
+template <class T> 
+T pga::population<T>::best_agent(){
     std::sort(new_population.begin(), new_population.end());
 
     return new_population[0];
@@ -68,7 +72,8 @@ template <class T> T pga::population<T>::best_agent(){
 /*
 Add a new agent to the pool
 */
-template <class T> void pga::population<T>::add_agent(T &a){
+template <class T> 
+void pga::population<T>::add_agent(T &a){
     T new_agent1 = a;
     T new_agent2 = a;
     current_population.push_back(new_agent1);
