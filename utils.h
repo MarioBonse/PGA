@@ -20,4 +20,10 @@ int distance(std::pair<int, int> , std::pair<int, int> );
 void from_point_to_matrix(std::vector<std::pair<int, int>> , std::vector<std::vector<int>> &);
 
 int load_graph(std::string , std::vector<std::vector<int>> &);
+
+void print_graph(std::vector<std::vector<int>>);
+
+void show_config(std::map<std::string, std::string>);
+
+#include "utils.cpp"
 #endif // !UTILS_H

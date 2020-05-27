@@ -6,23 +6,38 @@
 
 namespace pga{
     class TSPAgent : public Agent {
-        public:
+        void random_DNA();
         int size;
         std::vector<std::vector<int>>  graph;
         int chromosome_length;
         std::vector<int> DNA;
+        void mutate();
+        void greedy_DNA();
+        int find_nearer_avail_node(int starting_node, std::vector<int> visited);
         /* initializer. Start with a random path*/
-        TSPAgent(const TSPAgent &a){DNA = a.DNA ;graph = a.graph;fitness = a.fitness;};
+        public:
+        int path_lenght = 0;
+        int get_path(){return path_lenght;};
+        TSPAgent& operator=(const TSPAgent& a2);
+        TSPAgent(const TSPAgent &);
 
-        TSPAgent(std::vector<std::vector<int>> const graph, int chromosome_length):
-            graph(graph),chromosome_length(chromosome_length) {size = graph.size(); random_DNA();};
+        TSPAgent(std::vector<std::vector<int>> const, int, double);
+    
+        TSPAgent(std::vector<std::vector<int>> const, double);
 
-        TSPAgent(std::vector<std::vector<int>> const);
-        void random_DNA();
         void simulate();
-        void reproduce(TSPAgent, TSPAgent);
+        friend bool operator<(const TSPAgent& a1, const TSPAgent& a2)
+        {
+            return a1.path_lenght < a2.path_lenght; // keep the same order
+        };
+        void reproduce(const TSPAgent&, const TSPAgent &);
+        void print_solution();        
+        void show_statistics(const std::vector<TSPAgent> &);
+
         ~TSPAgent();
     };
 }
+
+#include "tspAgent.cpp"
 
 #endif

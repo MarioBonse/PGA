@@ -3,8 +3,12 @@
 #define POPULATION_H  
 #include <vector>
 #include <algorithm>
-#include "agent.h"
-#include "tspAgent.h"
+#include <random>
+
+#define GET_STATISTICS
+#ifdef GET_STATISTICS
+#include <chrono>
+#endif
 
 namespace pga{
     template <class T> class population{
@@ -15,14 +19,17 @@ namespace pga{
 
         std::vector<T> current_population;
         std::vector<T> new_population;
+        // cumulative fitness
+        double cum_fitness; 
+        int iterations = 0;
+        double percentage_to_keep;
         
         public:
-        //population();
+        population(double N_to_keep):percentage_to_keep(N_to_keep){};
 
         void normalize();
 
         void sort(){std::sort(current_population.begin(), current_population.end());};
-
         void add_agent(T &a);
 
         int pick_random_parent();
@@ -30,8 +37,135 @@ namespace pga{
         T best_agent(); //return the best agent from the previus simulation
 
         void simulate();
+        void show_statistics();
 
     };
+}
+
+
+// template <class T> pga::population<T>::population(){  
+//     std::cout<<"create new population\n";
+// }
+
+template <class T> 
+void pga::population<T>::show_statistics(){
+    double avg_fitness = cum_fitness/double(current_population.size());
+    std::cout<<"After "<<iterations<<" we have an average fitness of "<<avg_fitness;
+    // function that we can override in order to plot some statistics of the best agent
+    current_population[0].show_statistics(current_population);
+    std::cout<<std::endl;
+}
+
+template <class T> 
+void pga::population<T>::normalize(){
+    cum_fitness = 0.0;
+    for(int i = 0; i< current_population.size(); i++){
+        cum_fitness = cum_fitness + current_population[i].get_fitness();
+    }
+    for(int i = 0; i< current_population.size(); i++){
+        current_population[i].set_probability( current_population[i].get_fitness()/cum_fitness);
+    }
+}
+ 
+
+/* 
+sample one parent with probability 
+proportional to the fitness
+*/
+template <class T> 
+int pga::population<T>::pick_random_parent(){
+    double sample = dis(gen);
+    double cum_sum = 0;
+    int index = -1;
+    while(sample > cum_sum || index > current_population.size()){
+        index ++;
+        cum_sum += current_population[index].get_probability();
+    }
+    return index;
+}
+
+
+/*
+One step of simulation.
+1) It simulates the behaviur of all the agents. The simulation step has to implement update the fitness
+2) it sorts the agent in respect to the fitness (bacuse it optimize the next operation)
+3) sample two parents with probability proportional to the fitness
+4) create the new pool of agent
+*/
+template <class T> 
+void pga::population<T>::simulate(){
+    #ifdef GET_STATISTICS
+    auto start = std::chrono::high_resolution_clock::now();
+
+    #endif // GET_STATISTICS
+    for(int i = 0; i< current_population.size(); i++){
+        current_population[i].simulate();
+    }
+    #ifdef GET_STATISTICS
+    auto elapsed = std::chrono::high_resolution_clock::now() - start;
+    auto usec    = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+    std::cout <<"simulation took: "<< usec << std::endl;
+    #endif // GET_STATISTICS
+    // reproduce
+    // create the pool of parents
+    iterations++;
+
+    #ifdef GET_STATISTICS
+    start = std::chrono::high_resolution_clock::now();
+
+    #endif // GET_STATISTICS
+    std::sort(current_population.begin(), current_population.end());
+
+    #ifdef GET_STATISTICS
+    elapsed = std::chrono::high_resolution_clock::now() - start;
+    usec    = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+    std::cout <<"sorting took: "<< usec << std::endl;
+    #endif // GET_STATISTICS
+
+    normalize();
+    show_statistics();
+
+    #ifdef GET_STATISTICS
+    start = std::chrono::high_resolution_clock::now();
+
+    #endif // GET_STATISTICS
+
+    for(int i = 0; i<current_population.size(); i++){
+        // keep the best part of the population
+        if(i < int(current_population.size()*percentage_to_keep)){
+            new_population[i] = current_population[i];
+        }else{
+            int index1 = pick_random_parent();
+            int index2 = pick_random_parent();
+            new_population[i].reproduce(current_population[index1], current_population[index2]);
+        }
+    }
+    #ifdef GET_STATISTICS
+    elapsed = std::chrono::high_resolution_clock::now() - start;
+    usec    = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+    std::cout <<"reproduce took: "<< usec << std::endl;
+    #endif // GET_STATISTICS
+    current_population.swap(new_population);
+}
+
+/*
+Returns the best agent until now 
+*/
+template <class T> 
+T pga::population<T>::best_agent(){
+    std::sort(new_population.begin(), new_population.end());
+
+    return new_population[0];
+}
+
+/*
+Add a new agent to the pool
+*/
+template <class T> 
+void pga::population<T>::add_agent(T &a){
+    T new_agent2 = a;
+    current_population.push_back(a);
+    new_population.push_back(new_agent2);
 }
 
 
