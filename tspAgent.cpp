@@ -3,6 +3,9 @@
 #include "tspAgent.h"
 #include <algorithm>
 
+std::vector<std::vector<int>> my_graph;
+
+
 int find(std::vector<int> candidates, int node){
     for(auto c: candidates){
         if(c == node)return c;
@@ -13,20 +16,19 @@ int find(std::vector<int> candidates, int node){
 
 void pga::TSPAgent::mutate(){
     for(int i = 0; i<size;i++){
-    double sample = dis(gen);
-    if(sample < p_mutation){
-        int node_2 = rand()%size;
-        // switch with the random node
-        int app = DNA[i];
-        DNA[i] = DNA[node_2];
-        DNA[node_2] = app;
+        double sample = dis(gen);
+        if(sample < p_mutation){
+            int node_2 = rand()%size;
+            // switch with the random node
+            int app = DNA[i];
+            DNA[i] = DNA[node_2];
+            DNA[node_2] = app;
+        }
     }
-}
 }
 
 pga::TSPAgent& pga::TSPAgent::operator=(const pga::TSPAgent& a2){
     DNA = a2.DNA;
-    graph = a2.graph;
     fitness = a2.fitness;
     p_mutation = a2.p_mutation;
     size = a2.size;
@@ -63,7 +65,7 @@ int pga::TSPAgent::find_nearer_avail_node(int starting_node, std::vector<int> vi
     int index = -1;
     int length = INT32_MAX;
     for(int i = 0; i<size; i++){
-        if (!visited[i] && (graph[starting_node][i] < length)){length = graph[starting_node][i]; index = i;}
+        if (!visited[i] && (my_graph[starting_node][i] < length)){length = my_graph[starting_node][i]; index = i;}
     }
     return index;
 }
@@ -92,19 +94,18 @@ void pga::TSPAgent::random_DNA(){
     for(int i = 1; i<size; i++){
         visited[current_node] = 1;
         //pick random second edge
-        int next_node = next_random_node(graph[current_node], visited);
+        int next_node = next_random_node(my_graph[current_node], visited);
         if(next_node == -1) {DNA[i] = -1; alive = false; return;}
         DNA[i] = next_node;
         current_node = next_node;
     }
 }
 
-pga::TSPAgent::TSPAgent(std::vector<std::vector<int>> const G, int chromosome_len, double p_mutati = 0.01)
+pga::TSPAgent::TSPAgent(int chromosome_len, double p_mutati = 0.01)
 {
     chromosome_length = chromosome_len; 
-    graph = G;
     p_mutation = p_mutati;
-    size = graph[0].size();
+    size = my_graph[0].size();
     DNA.resize(size);
     greedy_DNA();
 }
@@ -112,7 +113,6 @@ pga::TSPAgent::TSPAgent(std::vector<std::vector<int>> const G, int chromosome_le
 pga::TSPAgent::TSPAgent(const TSPAgent &a)
 {
     DNA = a.DNA;
-    graph = a.graph;
     fitness = a.fitness;
     size = a.size; 
     chromosome_length = a.chromosome_length; 
@@ -120,10 +120,9 @@ pga::TSPAgent::TSPAgent(const TSPAgent &a)
     path_lenght = a.path_lenght;
 }
 
-pga::TSPAgent::TSPAgent(std::vector<std::vector<int>> const my_graph, double p_mutati = 0.01){
-    graph = my_graph;
+pga::TSPAgent::TSPAgent(double p_mutati = 0.01){
     p_mutation = p_mutati;
-    size = graph[0].size();
+    size = my_graph[0].size();
     chromosome_length = size/2;
     DNA.resize(size);
     greedy_DNA();
@@ -139,12 +138,12 @@ void pga::TSPAgent::simulate(){
     for(int i = 1; i < DNA.size();i++){
         end = DNA[i];
         if(end == -1){fitness = 0; return;}
-        if(graph[start][end]) 
-            path_lenght += graph[start][end];
+        if(my_graph[start][end]) 
+            path_lenght += my_graph[start][end];
         else {fitness = 0; return;}
         start = end;
     }
-    path_lenght += graph[0][size - 1];
+    path_lenght += my_graph[0][size - 1];
     // the fitness has to be > 0 and higher for better solution so we invert the lenght of the path
     fitness = 1.0/double(path_lenght);
 }
@@ -163,7 +162,6 @@ I'M ASSUMING THATH CHE GRAPH IS FULLY CONNECTED, FROM EACH NODE I CAN GO TO EVER
 */
 void pga::TSPAgent::reproduce(const pga::TSPAgent &p1,const  pga::TSPAgent &p2){
     size = p1.size;
-    graph = p1.graph;
     p_mutation = p1.p_mutation;
     chromosome_length = p1.chromosome_length;
     int n_chromosome = size/chromosome_length;

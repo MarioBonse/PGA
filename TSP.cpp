@@ -10,7 +10,6 @@
 #include "population.h"
 #include "utils.h"
 
-std::vector<std::vector<int>> my_graph;
 
 int main(int argc, char *argv[]) {    
     if (argc<3) {
@@ -18,7 +17,7 @@ int main(int argc, char *argv[]) {
         return -1;
     }
     std::string graph_path = argv[1];
-    std::vector<std::vector<int>> graph;
+
     if(load_graph(graph_path, my_graph) == -1)
         return -1;
     std::string config_file = argv[2];
@@ -37,7 +36,7 @@ int main(int argc, char *argv[]) {
 
     //create the agents
     for(int i = 0; i < number_agent ; i++){
-        pga::TSPAgent my_agent(graph, chromosome_len, p_mutation);
+        pga::TSPAgent my_agent(chromosome_len, p_mutation);
         pop.add_agent(my_agent);
     }   
 

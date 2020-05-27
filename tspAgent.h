@@ -8,7 +8,6 @@ namespace pga{
     class TSPAgent : public Agent {
         void random_DNA();
         int size;
-        std::vector<std::vector<int>>  graph;
         int chromosome_length;
         std::vector<int> DNA;
         void mutate();
@@ -21,9 +20,9 @@ namespace pga{
         TSPAgent& operator=(const TSPAgent& a2);
         TSPAgent(const TSPAgent &);
 
-        TSPAgent(std::vector<std::vector<int>> const, int, double);
+        TSPAgent(int, double);
     
-        TSPAgent(std::vector<std::vector<int>> const, double);
+        TSPAgent(double);
 
         void simulate();
         friend bool operator<(const TSPAgent& a1, const TSPAgent& a2)
