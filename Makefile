@@ -7,13 +7,15 @@ endif
 
 CUR_DIRECTORY=$(pwd)
 CXX		= g++ -std=c++17 
-INCLUDES	= -I $(FF_ROOT) 
+
 CXXFLAGS  	= -g -DBLOCKING_MODE -DFF_BOUNDED_BUFFER
+INCLUDES	= -I $(FF_ROOT) 
 
 LDFLAGS 	= -pthread
 OPTFLAGS	= -O3 -finline-functions -DNDEBUG
 
-TARGETS		= TSP 
+TARGETS		= TSP \
+				TSP_ff
 
 
 .PHONY: all clean cleanall

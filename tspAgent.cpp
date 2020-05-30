@@ -5,6 +5,16 @@
 
 std::vector<std::vector<int>> my_graph;
 
+std::vector<int> find_candidates(std::vector<int> nodes, std::vector<int> visited){
+    std::vector<int> candidates;
+    for(int i = 0; i<nodes.size(); i++){
+        // if the edge exists and we never visited it 
+        if(nodes[i] && !visited[i]){
+            candidates.push_back(i);
+        }
+    }
+    return candidates;
+}
 
 int find(std::vector<int> candidates, int node){
     for(auto c: candidates){
@@ -28,25 +38,18 @@ void pga::TSPAgent::mutate(){
 }
 
 pga::TSPAgent& pga::TSPAgent::operator=(const pga::TSPAgent& a2){
-    DNA = a2.DNA;
-    fitness = a2.fitness;
-    p_mutation = a2.p_mutation;
-    size = a2.size;
-    chromosome_length = a2.chromosome_length;
-    path_lenght = a2.path_lenght;
+    if(this != &a2){
+        DNA = a2.DNA;
+        fitness = a2.fitness;
+        p_mutation = a2.p_mutation;
+        size = a2.size;
+        chromosome_length = a2.chromosome_length;
+        path_lenght = a2.path_lenght;
+    }
     return *this;   
 }
 
-std::vector<int> find_candidates(std::vector<int> nodes, std::vector<int> visited){
-    std::vector<int> candidates;
-    for(int i = 0; i<nodes.size(); i++){
-        // if the edge exists and we never visited it 
-        if(nodes[i] && !visited[i]){
-            candidates.push_back(i);
-        }
-    }
-    return candidates;
-}
+
 
 int next_random_node(std::vector<int> nodes, std::vector<int> visited){
     

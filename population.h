@@ -4,6 +4,10 @@
 #include <vector>
 #include <algorithm>
 #include <random>
+#include <bits/stdc++.h> 
+#include <math.h> 
+
+enum normalization { linear, softmax};
 
 #define GET_STATISTICS
 #ifdef GET_STATISTICS
@@ -12,6 +16,7 @@
 
 namespace pga{
     template <class T> class population{
+        protected:
         std::random_device rd;  //Will be used to obtain a seed for the random number engine
         std::mt19937 gen{rd()}; //Standard mersenne_twister_engine seeded with rd()
         
@@ -23,13 +28,16 @@ namespace pga{
         double cum_fitness; 
         int iterations = 0;
         double percentage_to_keep;
+        normalization norm_type = softmax;
         
         public:
         population(double N_to_keep):percentage_to_keep(N_to_keep){};
-
+        void linear_normilize();
         void normalize();
+        void linear_normalize();
+        void softmax_normalize();
 
-        void sort(){std::sort(current_population.begin(), current_population.end());};
+        void sort(){std::sort(current_population.begin(), current_population.end(), std::greater<T>());};
         void add_agent(T &a);
 
         int pick_random_parent();
@@ -43,10 +51,6 @@ namespace pga{
 }
 
 
-// template <class T> pga::population<T>::population(){  
-//     std::cout<<"create new population\n";
-// }
-
 template <class T> 
 void pga::population<T>::show_statistics(){
     double avg_fitness = cum_fitness/double(current_population.size());
@@ -58,12 +62,22 @@ void pga::population<T>::show_statistics(){
 
 template <class T> 
 void pga::population<T>::normalize(){
-    cum_fitness = 0.0;
-    for(int i = 0; i< current_population.size(); i++){
-        cum_fitness = cum_fitness + current_population[i].get_fitness();
-    }
+    if(norm_type == linear)linear_normalize();
+    else if (norm_type == softmax)softmax_normalize();
+    else std::cerr<<"Normalization not supported\n";
+}
+
+template <class T> 
+void pga::population<T>::linear_normalize(){
     for(int i = 0; i< current_population.size(); i++){
         current_population[i].set_probability( current_population[i].get_fitness()/cum_fitness);
+    }
+}
+ 
+template <class T> 
+void pga::population<T>::softmax_normalize(){
+    for(int i = 0; i< current_population.size(); i++){
+        current_population[i].set_probability( exp(current_population[i].get_fitness())/cum_fitness);
     }
 }
  
@@ -94,12 +108,14 @@ One step of simulation.
 */
 template <class T> 
 void pga::population<T>::simulate(){
+    cum_fitness = 0.0;
     #ifdef GET_STATISTICS
     auto start = std::chrono::high_resolution_clock::now();
-
     #endif // GET_STATISTICS
     for(int i = 0; i< current_population.size(); i++){
         current_population[i].simulate();
+        if(norm_type == linear)cum_fitness += current_population[i].get_fitness();
+        else if(norm_type == softmax) cum_fitness += exp(current_population[i].get_fitness());
     }
     #ifdef GET_STATISTICS
     auto elapsed = std::chrono::high_resolution_clock::now() - start;
@@ -114,8 +130,7 @@ void pga::population<T>::simulate(){
     start = std::chrono::high_resolution_clock::now();
 
     #endif // GET_STATISTICS
-    std::sort(current_population.begin(), current_population.end());
-
+    sort();
     #ifdef GET_STATISTICS
     elapsed = std::chrono::high_resolution_clock::now() - start;
     usec    = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
@@ -123,7 +138,8 @@ void pga::population<T>::simulate(){
     #endif // GET_STATISTICS
 
     normalize();
-    show_statistics();
+
+
 
     #ifdef GET_STATISTICS
     start = std::chrono::high_resolution_clock::now();
@@ -144,6 +160,10 @@ void pga::population<T>::simulate(){
     elapsed = std::chrono::high_resolution_clock::now() - start;
     usec    = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
     std::cout <<"reproduce took: "<< usec << std::endl;
+    #endif // GET_STATISTICS
+
+    #ifndef GET_STATISTICS
+    show_statistics();
     #endif // GET_STATISTICS
     current_population.swap(new_population);
 }
