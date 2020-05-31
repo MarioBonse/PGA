@@ -6,7 +6,6 @@
 #include <random>
 #include <bits/stdc++.h> 
 #include <math.h> 
-
 enum normalization { linear, softmax};
 
 #define GET_STATISTICS

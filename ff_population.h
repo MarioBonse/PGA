@@ -1,6 +1,6 @@
 #ifndef FF_POPULATION_H
 #define FF_POPULATION_H
-
+    
 #include "population.h"
 #include <ff/utils.hpp>
 #include <ff/ff.hpp>
@@ -10,7 +10,9 @@
 #include <random>
 #include <bits/stdc++.h> 
 #include <math.h> 
+#include <mutex>
 
+std::mutex my_mutex;
 
 
 namespace pga{
@@ -39,6 +41,7 @@ namespace pga{
             workers = nw;
             parallel_simulation = new ff::ParallelForReduce<std::vector<T>>(nw);
             parallel_reproduction = new ff::ParallelFor(nw);
+
         };
         void simulate();
     };
@@ -55,7 +58,10 @@ void pga::ff_population<T>::simulate(){
                             0,          // chunk size (0=static, >0=dynamic) maybe dimanic is better for this task?
                             [&](int index, std::vector<T> &simulated_agent)  {
                                 population<T>::current_population[index].simulate();
-                                simulated_agent.push_back(population<T>::current_population[index]);
+                                T to_add_agent = population<T>::current_population[index];
+                                my_mutex.lock();
+                                simulated_agent.push_back(to_add_agent);
+                                my_mutex.unlock();
                                 double to_add;
                                 // update the global fitness
                                 if(population<T>::norm_type == linear) to_add = population<T>::current_population[index].get_fitness();
@@ -64,7 +70,9 @@ void pga::ff_population<T>::simulate(){
                             },
                             [](std::vector<T> &simulated_agent, const std::vector<T>& elem) {
                                 // the reduce part we merge in sorted order the result
-                                //std::sort(elem.begin(), elem.end(), std::greater<T>());
+                                my_mutex.lock();
+                                std::sort(elem.begin(), elem.end(), std::greater<T>());
+                                my_mutex.unlock();
                                 std::vector<T> out = simulated_agent; 
                                 std::merge(out.begin(), out.end(), elem.begin(), elem.end(), simulated_agent.begin());
                             }

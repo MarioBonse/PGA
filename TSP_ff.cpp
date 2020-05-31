@@ -6,7 +6,7 @@
 #include <random>
 #include <algorithm>
 #include <chrono>
-#include "ff_population.h"
+#include "ff_population_farm.h"
 #include "tspAgent.h"
 #include "utils.h"
 
@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
     int iterations = std::stoi(config["iterations"]);
     int chromosome_len = std::stoi(config["chromosome_len"]);
     double p_mutation = std::stod(config["p_mutation"]);
-    pga::ff_population<pga::TSPAgent> pop(std::stod(config["N_keep_agent"]), 4);
+    pga::ff_population<pga::TSPAgent> pop(std::stod(config["N_keep_agent"]), iterations, 4);
     int number_agent = std::stoi(config["population"]);
 
 
@@ -40,10 +40,8 @@ int main(int argc, char *argv[]) {
         pop.add_agent(my_agent);
     }   
 
-    for(int i = 0; i<iterations;++i){
-        // simulate and calculate the fitness
-        pop.simulate();
-    }
+    pop.simulate();
+
     std::cout<<"end simulation\n";
     pga::TSPAgent best_agent = pop.best_agent();
     best_agent.print_solution();
