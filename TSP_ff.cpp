@@ -9,6 +9,7 @@
 #include "ff_population_farm.h"
 #include "tspAgent.h"
 #include "utils.h"
+#include <chrono>
 
 
 int main(int argc, char *argv[]) {    
@@ -25,13 +26,16 @@ int main(int argc, char *argv[]) {
     if(load_config(config_file, config) == -1){
         return -1;
     }
-
+    int nw = 4;
+    if(argc == 4)
+        nw = atoi(argv[3]);
     // show_config(config);
     int iterations = std::stoi(config["iterations"]);
     int chromosome_len = std::stoi(config["chromosome_len"]);
     double p_mutation = std::stod(config["p_mutation"]);
-    pga::ff_population<pga::TSPAgent> pop(std::stod(config["N_keep_agent"]), iterations, 4);
     int number_agent = std::stoi(config["population"]);
+
+    pga::ff_population_farm<pga::TSPAgent> pop(std::stod(config["N_keep_agent"]), number_agent,  nw);
 
 
     //create the agents
@@ -40,9 +44,14 @@ int main(int argc, char *argv[]) {
         pop.add_agent(my_agent);
     }   
 
-    pop.simulate();
+    auto start = std::chrono::high_resolution_clock::now();
 
-    std::cout<<"end simulation\n";
+    pop.simulate(iterations); 
+
+    auto elapsed = std::chrono::high_resolution_clock::now() - start;
+    auto usec    = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+    std::cout <<"the whole simulation took: "<< usec << std::endl;
+
     pga::TSPAgent best_agent = pop.best_agent();
-    best_agent.print_solution();
+    //best_agent.print_solution();
 }

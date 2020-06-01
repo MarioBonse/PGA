@@ -33,3 +33,7 @@
 
 graph/ALL_tsp
 .vscode
+
+TSP
+TSP_ff
+TSP_thread

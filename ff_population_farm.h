@@ -5,221 +5,255 @@
 #include <ff/utils.hpp>
 #include <ff/ff.hpp>
 #include <ff/parallel_for.hpp>
+#include <ff/farm.hpp>
 #include <vector>
 #include <algorithm>
 #include <random>
 #include <bits/stdc++.h> 
 #include <math.h> 
+#include "barrier.h"
 
-
-union task_type{
-    int index;
-    double cum_fitness;
-};
-
-template <class T> 
-struct task{
-    std::vector<T>* A;
-    task_type extra_data;
-};
-
-// code of one of the worker of the farm. It takes a group of agent and simulate 
-// their behaviur, calculate the cumulative fitness and send the sorted agent with the cum fitness
-template <class T> 
-struct simulation_: ff_node_t<task<T>> {
-    task<T>* svc(task<T>* run) {
-        double cum_fitness = 0.0;
-        for(auto r:result){
-            r.simulate();
-            if(P->norm_type == linear)cum_fitness += r.get_fitness();
-            else if (P->norm_type == softmax) += exp(r.get_fitness());
-        }
-        std::sort(run->A.begin(), run->A.end(), std::greater<T>());
-        // the reduce like seaction
-        run->extra_data.cum_fitness = cum_fitness;
-        //write cumulative fitness
-        ff_send_out(run);
-        return GO_ON;    
-    }
-
-    simluation(pga::ff_population_farm<T> *Pop):P(Pop);
-    pga::ff_population_farm<T>*P;
-};
-
-
-//reproduce and normalize
-template <class T> 
-struct reproduce_: ff_node_t<task<T>> {
-    task<T>* svc(task<T>* run) {
-        // normalize
-        // for(auto r:result){
-        //     r.set_probabilty(r.get_fitness()/cum_fitness);
-        // }
-        // wait barrier
-
-        // copy or simulate section
-        int number_to_copy = int(run->A.size()*P->percentage_to_keep);
-        for(int i = 0; i < run->A.size(); i++){
-            if(i < number_to_copy){
-                run->A[i] = P->current_population[run->extra_data.index*number_to_copy + i];
-            }else{
-                int index1 = P->pick_random_parent();
-                int index2 = P->pick_random_parent();
-                run->A[i].reproduce(P->current_population[index1], P->current_population[index2]);
-            }
-        }
-        ff_send_out(run);
-        return GO_ON;   
-    }
-    reproduce_(pga::ff_population_farm<T> *Pop):P(Pop);
-    pga::ff_population_farm<T>*P;
-};
-
-// merge the output from the simulation phase in sorted vector. 
-// then send out again to the reproduction phase
-template <class T> 
-struct collector_: ff_node_t<task<T>> {
-    task<T>* svc(task<T>* run) {
-        task<T> app;
-        std::merge(run->A.begin(), run->A.end(), global_result.begin(), global_result.end(), std::back_inserter(app));
-        std::swap(global_result, app);
-
-        P->cum_fitness += run->extra_data.cum_fitness;
-
-        if(global_result.size() ==  P->size){
-            P->normalize();
-            P->current_population = global_result;
-            // send out again
-            int step = (0 - P->size)/P->nw;
-            int new_start = 0;
-            task<T> *send;
-            send->A.reserve(step);
-            for(; new_start < P->size; new_start += step) {
-                for(int i = 0; i < step; i ++){
-                    send->A.append(P->current_population[new_start + i]);
-                }
-                send->extra_data.index = new_start/step;//if needed
-                ff_send_out(send);
-            }
-
-        }
-        return GO_ON;
-
-    }
-    collector_emitter(pga::ff_population_farm<T> *Pop):P(Pop);
-    std::vector<T> global_result;
-    pga::population<T>*P;
-
-};
-
-// emitter: this function send the agents from current_population 
-// to the simulation section which is a farm. 
-template <class T> 
-struct emitter: ff_node_t<task<T>>{
-    task<T>* svc(task<T>* run) {
-        if(run == nullptr){//sendo out the first time
-            curr_iteration ++;
-            int step = (0 - P->size)/P->nw;
-            int new_start = 0;
-            task<T> *send;
-            send->A.reserve(step);
-            for(; new_start < P->size; new_start += step) {
-                for(int i = 0; i < step; i ++){
-                    send->A.append(P->current_population[new_start + i]);
-                }
-                send->extra_data.index = new_start/step;//if needed
-                ff_send_out(send);
-            }
-            current_index = 0;
-            return GO_ON; 
-        }
-        // copy the result into new_population
-        for(int i = 0; i < run->A.size(); i++ ){
-            P->new_population[current_index] = run->A[i];
-            current_index++;
-        }
-        //until we don't fill the new population vector we just merge it
-        if(current_index < P->size){
-            return GO_ON;
-        }
-        P->show_statistics();
-        current_index = 0;
-        //eventually, if we still have iterations to do, we send the data again
-        if(curr_iteration < P->iterations){
-            std::swap(P->current_population, P->new_population);
-            curr_iteration ++;
-            int step = (0 - P->size)/P->nw;
-            int new_start = 0;
-            task<T> *send;
-            send->A.reserve(step);
-            for(; new_start < P->size; new_start += step) {
-                for(int i = 0; i < P->size && i < step; i ++){
-                    // copy into the send structure the data we want to send
-                    send->A.append(P->current_population[new_start + i]);
-                }
-                send->extra_data.index = new_start/step;//if needed
-                ff_send_out(send);
-            }
-            return GO_ON; 
-        }
-        return EOS;       
-    }
-    emitter(pga::ff_population_farm<T> *Pop):P(Pop);
-    pga::population<T>*P;
-    int current_index = 0;
-};
-
-
+// #define DEBUG 
 
 namespace pga{
-    template <class T> 
-    class ff_population_farm : private population<T> {
-        public:
-        int workers;
-        int size;
-        int interations;
-        void add_agent(T& a){
-            population<T>::add_agent(a);
-        };
-        T best_agent(){
-            return population<T>::best_agent();
-        };
+    template <class agent_type> 
+    struct ff_population_farm : population<agent_type> {
+        Barrier my_barrier;
+        int curr_iterations;
 
-        ff_population(double N_to_keep, int iter = 1, int workers = 4): population<T>(N_to_keep)
+        ff_population_farm(double P_to_keep, int number_agent, int nw): population<agent_type>(P_to_keep, number_agent)
         {
-            interations = iter;
-            workers = nw;
+            
+            this->workers = nw;
+            my_barrier.set_barrier(nw);
         };
 
-        void simulate();
+        void simulate(int);
     };
-}
 
-template <class T> 
-void pga::ff_population<T>::simulate(){
-    size = current_population.size();
-    emitter E(this);
-    collector_emitter CE(this);
+    union task_type{
+        int index;
+        double cum_fitness;
+    };
 
-    std::vector<std::unique_ptr<ff_node>> S;
-    for(int i = 0; i < workers; i++)S.push_back(make_unique<simulation_>(this));
+    template <class T> struct task{
+        task(ff_population_farm<T>*P, int step, int start){
+            A.reserve(step);
+            for(int i = 0; i + start < P->current_population.size() && i<step; i++)
+                A.push_back(P->current_population[start + i]);
+            extra_data.index = start/step;
+        }
+        std::vector<T> A;
+        task_type extra_data;
 
-    std::vector<std::unique_ptr<ff_node>> R;
-    for(int i = 0; i < workers; i++)R.push_back(make_unique<reproduce_>(this));
-    // create the farm and remove the collector
-    ff_Farm<std::vector<ull>> simulation_farm(std::move(E));
-    simulation_farm.add_emitter(E);
-    simulation_farm.add_collector(CE);
-    ff_Farm<std::vector<ull>> reprodcution_farm(std::move(R));
-    reprodcution_farm.add_emitter(CE);
-    reprodcution_farm.add_collector(E);
-    ff_sequential
-    if (pipe.run_and_wait_end()<0) {
-        error("running pipe");
-        return -1;
+    };
+
+    // code of one of the worker of the farm. It takes a group of agent and simulate 
+    // their behaviur, calculate the cumulative fitness and send the sorted agent with the cum fitness
+    template <typename T> struct simulation_ : ff::ff_node_t<task<T>>{
+        simulation_(pga::ff_population_farm<T> *Pop){P = Pop;};
+        pga::ff_population_farm<T>*P;
+
+        task<T>* svc(task<T>* run) {
+            double cum_fitness = 0.0;
+            for(int i = 0; i < run->A.size(); i++){
+                run->A[i].simulate();
+                if(P->norm_type == linear)cum_fitness += run->A[i].get_fitness();
+                else if (P->norm_type == softmax) cum_fitness += exp(run->A[i].get_fitness());
+            }
+            std::sort(run->A.begin(), run->A.end(), std::greater<T>());
+            // the reduce like seaction
+            run->extra_data.cum_fitness = cum_fitness;
+            //write cumulative fitness
+            this->ff_send_out(run);
+            return this->GO_ON;    
+        }
+
+    };
+
+
+    //reproduce and normalize
+    template <typename T> struct reproduce_ : ff::ff_node_t<task<T>>{
+
+        reproduce_(ff_population_farm<T> *Pop){P = Pop;};
+
+        pga::ff_population_farm<T>*P;
+        
+        task<T>* svc(task<T>* run) {
+            // normalize
+            int size = run->A.size();
+            int index = run->extra_data.index;
+            // for(int i = 0; i < size; i++){
+            //     if(P->norm_type == linear)
+            //         P->current_population[index*size + i].set_probability(P->current_population[index*size + i].get_fitness()/P->cum_fitness);
+            //     else if(P->norm_type == softmax)
+            //         P->current_population[index*size + i].set_probability(exp(P->current_population[index*size + i].get_fitness())/P->cum_fitness);
+
+            // }
+            // P->my_barrier.Wait();
+
+            #ifdef DEBUG
+            std::cout<<"Reproduction\n";
+            #endif // DEBUG
+            // copy or simulate section
+            int number_to_copy = int(P->size*P->percentage_to_keep)/P->workers;
+            // if we can't divide the agents to keep we add the spare part to the first worker
+            int extra_shift = int(P->size*P->percentage_to_keep)%P->workers;
+            if(index == 0)number_to_copy += extra_shift;
+            for(int i = 0; i < run->A.size(); i++){
+                if(i < number_to_copy){
+                    run->A[i] = P->current_population[run->extra_data.index*number_to_copy + i + extra_shift];
+                }else{
+                    int index1 = P->pick_random_parent();
+                    int index2 = P->pick_random_parent();
+                    run->A[i].reproduce(P->current_population[index1], P->current_population[index2]);
+                }
+            }
+            this->ff_send_out(run);
+            return this->GO_ON;   
+        }
+
+    };
+
+    // merge the output from the simulation phase in sorted vector. 
+    // then send out again to the reproduction phase
+    template <typename T> struct collector_emitter : ff::ff_node_t<task<T>>{
+        collector_emitter(ff_population_farm<T> *Pop){P = Pop;};
+        std::vector<T> global_result;
+        ff_population_farm<T>*P;
+        task<T>* svc(task<T>* run) {
+            std::vector<T> app;
+            app.reserve(P->current_population.size());
+            std::merge(run->A.begin(), run->A.end(), global_result.begin(), global_result.end(), std::back_inserter(app),  std::greater<T>());
+            std::swap(global_result, app);
+            #ifdef DEBUG
+            std::cout<<"reciving from simuatioon\n";
+            #endif // DEBUG
+            P->cum_fitness += run->extra_data.cum_fitness;
+            delete run;
+            if(global_result.size() ==  P->current_population.size()){
+
+                P->current_population = global_result;
+                P->normalize();
+                // send out again
+                #ifdef DEBUG
+                std::cout<<"sending to reproduction\n";
+                #endif // DEBUG
+                int step = P->current_population.size()/P->workers;
+                for(int new_start = 0; new_start < P->current_population.size(); new_start += step) {
+                    this->ff_send_out(new task<T>(P, step, new_start));
+                }
+                #ifdef DEBUG
+                std::cout<<"send all to reproduction\n";
+                #endif // DEBUG
+                global_result.clear();
+
+            }
+            return this->GO_ON;
+
+        }
+
+
+    };
+
+    // emitter: this function send the agents from current_population 
+    // to the simulation section which is a farm. 
+    template <typename T> struct emitter : ff::ff_node_t<task<T>>{
+        emitter(pga::ff_population_farm<T> *Pop, int iter){P = Pop;};
+
+        // int iterations;
+        pga::ff_population_farm<T>*P;
+        int current_index = 0;
+        int curr_iteration = 0;
+
+        task<T>* svc(task<T>* run) {
+            if(run == nullptr){//sendo out the first time
+                current_index++;
+                #ifdef DEBUG
+                std::cout<<"Start [only once] sending out from emitter to sim\n";
+                #endif // DEBUG
+
+                int step = P->current_population.size()/P->workers;
+                for(int new_start = 0; new_start < P->current_population.size(); new_start += step) {
+                    this->ff_send_out(new task<T>(P, step, new_start));
+                }
+                current_index = 0;
+                return this->GO_ON; 
+            }
+            // copy the result into new_population
+            #ifdef DEBUG
+            std::cout<<"starting again. Reciving iteration before from reproduction\n";
+            #endif // DEBUG
+            for(int i = 0; i < run->A.size(); i++ ){
+                P->new_population[current_index] = run->A[i];
+                current_index++;
+            }
+            delete run;
+            //until we don't fill the new population vector we just merge it
+            if(current_index < P->current_population.size()){
+                return this->GO_ON;
+            }     
+            
+            //eventually, if we still have iterations to do, we send the data again
+            if(curr_iteration < P->curr_iterations){
+                current_index = 0;
+                P->iterations = curr_iteration;
+                P->show_statistics();
+                std::swap(P->current_population, P->new_population);
+                P->cum_fitness = 0.0;
+                curr_iteration ++;
+                int step = P->current_population.size()/P->workers;
+                #ifdef DEBUG
+                std::cout<<"seding again. new iteration. TO simulate\n";
+                #endif // DEBUG
+
+                for(int new_start = 0; new_start < P->current_population.size(); new_start += step) {
+                    this->ff_send_out(new task<T>(P, step, new_start));
+                }
+                return this->GO_ON; 
+            }
+            return this->EOS;       
+        }
+    };
+
+    template <class T> 
+    void pga::ff_population_farm<T>::simulate(int iter){
+        ff::OptLevel opt;
+        opt.blocking_mode = true;
+        this->curr_iterations = iter;
+        this->size = this->current_population.size();
+        emitter<T> E(this, this->curr_iterations);
+        collector_emitter<T> CE(this);
+        #ifdef DEBUG
+        std::cout<<"simulationg...\n";
+        #endif // DEBUG
+        std::vector<std::unique_ptr<ff::ff_node>> S;
+        for(int i = 0; i < this->workers; i++)S.push_back(ff::make_unique<simulation_<T>>(this));
+
+        std::vector<std::unique_ptr<ff::ff_node>> R;
+        for(int i = 0; i < this->workers; i++)R.push_back(ff::make_unique<reproduce_<T>>(this));
+        // create the farm and remove the collector
+        ff::ff_Farm<task<T>> simulation_farm(std::move(S));
+        // the second farm
+        ff::ff_Farm<task<T>> reprodcution_farm(std::move(R));
+        
+        
+        simulation_farm.add_emitter(E);
+        reprodcution_farm.add_emitter(CE);
+        simulation_farm.remove_collector();
+        reprodcution_farm.remove_collector();
+
+        ff::ff_Pipe pipe(simulation_farm, reprodcution_farm);
+
+        ff::optimize_static(pipe, opt);
+
+        pipe.wrap_around();
+        if (pipe.run_and_wait_end()<0) {
+            std::cerr<<("running pipe");
+            return ;
+        }
+        
     }
-    // simluation with a parllel for reduce (the reduce for sorting)
-    
 }
 
 #endif // !FF_POPULATION_H

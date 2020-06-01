@@ -43,6 +43,7 @@ pga::TSPAgent& pga::TSPAgent::operator=(const pga::TSPAgent& a2){
         fitness = a2.fitness;
         p_mutation = a2.p_mutation;
         size = a2.size;
+        probability = a2.probability;
         chromosome_length = a2.chromosome_length;
         path_lenght = a2.path_lenght;
     }

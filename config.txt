@@ -1,5 +1,5 @@
-population:1000
-N_keep_agent:0.01
+population:2000
+N_keep_agent:0.1
 p_mutation:0.01
-iterations:10
+iterations:100
 chromosome_len:10

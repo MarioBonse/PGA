@@ -9,6 +9,7 @@
 #include "tspAgent.h"
 #include "population.h"
 #include "utils.h"
+#include <chrono>
 
 
 int main(int argc, char *argv[]) {    
@@ -30,8 +31,9 @@ int main(int argc, char *argv[]) {
     int iterations = std::stoi(config["iterations"]);
     int chromosome_len = std::stoi(config["chromosome_len"]);
     double p_mutation = std::stod(config["p_mutation"]);
-    pga::population<pga::TSPAgent> pop(std::stod(config["N_keep_agent"]));
     int number_agent = std::stoi(config["population"]);
+
+    pga::population<pga::TSPAgent> pop(std::stod(config["N_keep_agent"]), number_agent);
 
 
     //create the agents
@@ -40,11 +42,17 @@ int main(int argc, char *argv[]) {
         pop.add_agent(my_agent);
     }   
 
+
+    auto start = std::chrono::high_resolution_clock::now();
+
     for(int i = 0; i<iterations;++i){
         // simulate and calculate the fitness
         pop.simulate();
     }
-    std::cout<<"end simulation\n";
+
+    auto elapsed = std::chrono::high_resolution_clock::now() - start;
+    auto usec    = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+    std::cout <<"the whole simulation took: "<< usec << std::endl;
     pga::TSPAgent best_agent = pop.best_agent();
     best_agent.print_solution();
 }

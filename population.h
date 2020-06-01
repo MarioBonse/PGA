@@ -14,8 +14,10 @@ enum normalization { linear, softmax};
 #endif
 
 namespace pga{
-    template <class T> class population{
-        protected:
+    template <typename T> struct population{
+        public:
+        int workers;
+        int size;
         std::random_device rd;  //Will be used to obtain a seed for the random number engine
         std::mt19937 gen{rd()}; //Standard mersenne_twister_engine seeded with rd()
         
@@ -25,12 +27,16 @@ namespace pga{
         std::vector<T> new_population;
         // cumulative fitness
         double cum_fitness; 
-        int iterations = 0;
+        int iterations;
         double percentage_to_keep;
         normalization norm_type = softmax;
-        
-        public:
-        population(double N_to_keep):percentage_to_keep(N_to_keep){};
+
+        population(double P_to_keep, int number_agent):percentage_to_keep(P_to_keep){
+            current_population.reserve(number_agent);
+            new_population.reserve(number_agent);
+            size = number_agent;
+        };
+
         void linear_normilize();
         void normalize();
         void linear_normalize();
@@ -90,9 +96,10 @@ int pga::population<T>::pick_random_parent(){
     double sample = dis(gen);
     double cum_sum = 0;
     int index = -1;
-    while(sample > cum_sum || index > current_population.size()){
+    while(  sample > cum_sum){
         index ++;
-        cum_sum += current_population[index].get_probability();
+        if(index == current_population.size())return index - 1;
+        cum_sum += current_population[index].probability;
     }
     return index;
 }
@@ -136,9 +143,19 @@ void pga::population<T>::simulate(){
     std::cout <<"sorting took: "<< usec << std::endl;
     #endif // GET_STATISTICS
 
+
+    #ifdef GET_STATISTICS
+    start = std::chrono::high_resolution_clock::now();
+
+    #endif // GET_STATISTICS
+
     normalize();
 
-
+    #ifdef GET_STATISTICS
+    elapsed = std::chrono::high_resolution_clock::now() - start;
+    usec    = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+    std::cout <<"normalization took: "<< usec << std::endl;
+    #endif // GET_STATISTICS
 
     #ifdef GET_STATISTICS
     start = std::chrono::high_resolution_clock::now();
