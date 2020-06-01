@@ -11,6 +11,7 @@
 #include <bits/stdc++.h> 
 #include <math.h> 
 #include <mutex>
+#include <atomic>
 
 std::mutex my_mutex;
 
@@ -59,9 +60,7 @@ void pga::ff_population<T>::simulate(){
                             [&](int index, std::vector<T> &simulated_agent)  {
                                 population<T>::current_population[index].simulate();
                                 T to_add_agent = population<T>::current_population[index];
-                                my_mutex.lock();
                                 simulated_agent.push_back(to_add_agent);
-                                my_mutex.unlock();
                                 double to_add;
                                 // update the global fitness
                                 if(population<T>::norm_type == linear) to_add = population<T>::current_population[index].get_fitness();
@@ -70,7 +69,6 @@ void pga::ff_population<T>::simulate(){
                             },
                             [](std::vector<T> &simulated_agent, const std::vector<T>& elem) {
                                 // the reduce part we merge in sorted order the result
-                                my_mutex.lock();
                                 std::sort(elem.begin(), elem.end(), std::greater<T>());
                                 my_mutex.unlock();
                                 std::vector<T> out = simulated_agent; 

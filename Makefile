@@ -39,6 +39,7 @@ OPTFLAGS	= -O3 -finline-functions -DNDEBUG
 
 TARGETS		= TSP     \
 		  	TSP_ff \
+			  TSP_thread
 
 .PHONY: all clean cleanall
 .SUFFIXES: .cpp 
