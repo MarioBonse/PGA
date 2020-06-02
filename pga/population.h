@@ -8,7 +8,7 @@
 #include <math.h> 
 enum normalization { linear, softmax};
 
-// #define GET_STATISTICS
+#define GET_STATISTICS
 #ifdef GET_STATISTICS
 #include <chrono>
 #endif
@@ -49,7 +49,7 @@ namespace pga{
 
         T best_agent(); //return the best agent from the previus simulation
 
-        void simulate();
+        void simulate(int);
         void show_statistics();
 
     };
@@ -113,75 +113,77 @@ One step of simulation.
 4) create the new pool of agent
 */
 template <class T> 
-void pga::population<T>::simulate(){
-    cum_fitness = 0.0;
-    #ifdef GET_STATISTICS
-    auto start = std::chrono::high_resolution_clock::now();
-    #endif // GET_STATISTICS
-    for(int i = 0; i< current_population.size(); i++){
-        current_population[i].simulate();
-        if(norm_type == linear)cum_fitness += current_population[i].get_fitness();
-        else if(norm_type == softmax) cum_fitness += exp(current_population[i].get_fitness());
-    }
-    #ifdef GET_STATISTICS
-    auto elapsed = std::chrono::high_resolution_clock::now() - start;
-    auto usec    = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
-    std::cout <<"simulation took: "<< usec << std::endl;
-    #endif // GET_STATISTICS
-    // reproduce
-    // create the pool of parents
-    iterations++;
-
-    #ifdef GET_STATISTICS
-    start = std::chrono::high_resolution_clock::now();
-
-    #endif // GET_STATISTICS
-    sort();
-    #ifdef GET_STATISTICS
-    elapsed = std::chrono::high_resolution_clock::now() - start;
-    usec    = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
-    std::cout <<"sorting took: "<< usec << std::endl;
-    #endif // GET_STATISTICS
-
-
-    #ifdef GET_STATISTICS
-    start = std::chrono::high_resolution_clock::now();
-
-    #endif // GET_STATISTICS
-
-    normalize();
-
-    #ifdef GET_STATISTICS
-    elapsed = std::chrono::high_resolution_clock::now() - start;
-    usec    = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
-    std::cout <<"normalization took: "<< usec << std::endl;
-    #endif // GET_STATISTICS
-
-    #ifdef GET_STATISTICS
-    start = std::chrono::high_resolution_clock::now();
-
-    #endif // GET_STATISTICS
-
-    for(int i = 0; i<current_population.size(); i++){
-        // keep the best part of the population
-        if(i < int(current_population.size()*percentage_to_keep)){
-            new_population[i] = current_population[i];
-        }else{
-            int index1 = pick_random_parent();
-            int index2 = pick_random_parent();
-            new_population[i].reproduce(current_population[index1], current_population[index2]);
+void pga::population<T>::simulate(int iter){
+    for(int i = 0; i<iter; i++){
+        cum_fitness = 0.0;
+        #ifdef GET_STATISTICS
+        auto start = std::chrono::high_resolution_clock::now();
+        #endif // GET_STATISTICS
+        for(int i = 0; i< current_population.size(); i++){
+            current_population[i].simulate();
+            if(norm_type == linear)cum_fitness += current_population[i].get_fitness();
+            else if(norm_type == softmax) cum_fitness += exp(current_population[i].get_fitness());
         }
-    }
-    #ifdef GET_STATISTICS
-    elapsed = std::chrono::high_resolution_clock::now() - start;
-    usec    = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
-    std::cout <<"reproduce took: "<< usec << std::endl;
-    #endif // GET_STATISTICS
+        #ifdef GET_STATISTICS
+        auto elapsed = std::chrono::high_resolution_clock::now() - start;
+        auto usec    = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+        std::cout <<"simulation took: "<< usec << std::endl;
+        #endif // GET_STATISTICS
+        // reproduce
+        // create the pool of parents
+        iterations++;
 
-    #ifndef GET_STATISTICS
-    show_statistics();
-    #endif // GET_STATISTICS
-    current_population.swap(new_population);
+        #ifdef GET_STATISTICS
+        start = std::chrono::high_resolution_clock::now();
+
+        #endif // GET_STATISTICS
+        sort();
+        #ifdef GET_STATISTICS
+        elapsed = std::chrono::high_resolution_clock::now() - start;
+        usec    = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+        std::cout <<"sorting took: "<< usec << std::endl;
+        #endif // GET_STATISTICS
+
+
+        #ifdef GET_STATISTICS
+        start = std::chrono::high_resolution_clock::now();
+
+        #endif // GET_STATISTICS
+
+        normalize();
+
+        #ifdef GET_STATISTICS
+        elapsed = std::chrono::high_resolution_clock::now() - start;
+        usec    = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+        std::cout <<"normalization took: "<< usec << std::endl;
+        #endif // GET_STATISTICS
+
+        #ifdef GET_STATISTICS
+        start = std::chrono::high_resolution_clock::now();
+
+        #endif // GET_STATISTICS
+
+        for(int i = 0; i<current_population.size(); i++){
+            // keep the best part of the population
+            if(i < int(current_population.size()*percentage_to_keep)){
+                new_population[i] = current_population[i];
+            }else{
+                int index1 = pick_random_parent();
+                int index2 = pick_random_parent();
+                new_population[i].reproduce(current_population[index1], current_population[index2]);
+            }
+        }
+        #ifdef GET_STATISTICS
+        elapsed = std::chrono::high_resolution_clock::now() - start;
+        usec    = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+        std::cout <<"reproduce took: "<< usec << std::endl;
+        #endif // GET_STATISTICS
+
+        #ifndef GET_STATISTICS
+        show_statistics();
+        #endif // GET_STATISTICS
+        current_population.swap(new_population);
+    }
 }
 
 /*

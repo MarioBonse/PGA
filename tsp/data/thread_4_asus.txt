@@ -1,0 +1,62 @@
+Loading the graph from graph/rat783.tsp
+file read succefully
+DIMENSION   783
+EDGE_WEIGHT_TYPE : EUC_2D
+loading config file 
+population : 10000
+N_keep_agent : 0.1
+p_mutation : 0.1
+iterations : 10
+chromosome_len : 400
+checking config
+simulation took: 30758
+merge took: 28601
+normalization took: 1017
+reproduction took: 270056
+After 2 we have an average fitness of 1.00001 max value is: 46643
+simulation took: 31205
+merge took: 28089
+normalization took: 865
+reproduction took: 307339
+After 2 we have an average fitness of 1.00001 max value is: 46643
+simulation took: 31316
+merge took: 27659
+normalization took: 983
+reproduction took: 302335
+After 2 we have an average fitness of 1.00001 max value is: 46643
+simulation took: 26396
+merge took: 27732
+normalization took: 1265
+reproduction took: 313955
+After 2 we have an average fitness of 1.00001 max value is: 46643
+simulation took: 32048
+merge took: 28138
+normalization took: 1006
+reproduction took: 309117
+After 2 we have an average fitness of 1.00001 max value is: 46643
+simulation took: 26664
+merge took: 28233
+normalization took: 1026
+reproduction took: 317308
+After 2 we have an average fitness of 1.00001 max value is: 46643
+simulation took: 30942
+merge took: 27711
+normalization took: 1032
+reproduction took: 309921
+After 2 we have an average fitness of 1.00001 max value is: 46643
+simulation took: 32002
+merge took: 27683
+normalization took: 1057
+reproduction took: 340898
+After 2 we have an average fitness of 1.00001 max value is: 46643
+simulation took: 26214
+merge took: 28082
+normalization took: 825
+reproduction took: 328047
+After 2 we have an average fitness of 1.00001 max value is: 46643
+simulation took: 26616
+merge took: 28236
+normalization took: 1122
+reproduction took: 320348
+After 2 we have an average fitness of 1.00001 max value is: 46643
+the whole simulation took: 3705106

@@ -3,6 +3,11 @@
 #include "population.h"
 #include <atomic>
 
+#define GET_STATISTICS
+#ifdef GET_STATISTICS
+#include <chrono>
+#endif
+
 namespace pga{
 
     typedef struct {
@@ -28,13 +33,53 @@ namespace pga{
     };
 
 
+    // the version of merge with the std lib is far slower than mine implementation
+    // template <typename T>
+    // void thread_population<T>::merge(std::vector<RANGE> & range){
+    //     int start = range[0].end;
+    //     for(int i = 1; i < range.size(); i++){
+    //         std::inplace_merge(this->current_population.begin(), this->current_population.begin() + range[i].start,
+    //             this->current_population.begin() + range[i].end, std::greater<T>());
+    //     }
+    // }
+
+    template <typename vec_type>
+    int argmax(std::vector<vec_type> &vec){
+        if(vec.size() == 0)return -1;
+        vec_type max_val = vec[0];
+        int index = 0;
+        for(int i = 1; i< vec.size(); ++i){
+            if(max_val < vec[i]){
+                index = i;
+                max_val = vec[i];
+            }
+        }
+        return index;
+    }
+
     template <typename T>
     void thread_population<T>::merge(std::vector<RANGE> & range){
-        int start = range[0].end;
-        for(int i = 1; i < range.size(); i++){
-            std::inplace_merge(this->current_population.begin(), this->current_population.begin() + range[i].start,
-                this->current_population.begin() + range[i].end, std::greater<T>());
+        std::vector<int> indexes(range.size());
+        for(int i = 0; i < indexes.size(); i++){
+            indexes[i] = range[i].start;
         }
+        std::vector<T> agents(indexes.size());
+        for(int i = 0; i < indexes.size(); i++){
+            agents[i] = this->current_population[indexes[i]];
+        }
+        for(int j = 0; j<this->current_population.size(); j++){
+            // 1 find max value betwen the candidates
+            int curr_index = argmax(agents);
+            // copy and increments the corrisponding indsex
+            this->new_population[j] = agents[curr_index];
+            // if we have finished the range then set the agent to a dummy valus
+            if(indexes[curr_index] == range[curr_index].end - 1){
+                agents[curr_index].fitness = -1;
+            }else{
+                agents[curr_index] = this->current_population[++indexes[curr_index]];
+            }
+        }
+        this->current_population.swap(this->new_population);
     }
 
     template <typename T>
@@ -83,7 +128,10 @@ namespace pga{
                         }
                     }
             };
-            
+            #ifdef GET_STATISTICS
+            auto start = std::chrono::high_resolution_clock::now();
+            #endif // GET_STATISTICS
+
             for(int i=0; i<nw; i++) {                     // assign chuncks to threads
                 tids.push_back(std::thread(simulations_phase, ranges[i]));
             }
@@ -91,10 +139,39 @@ namespace pga{
             for(std::thread& t: tids) {                        // await thread termination
                 t.join();
             }
+            #ifdef GET_STATISTICS
+            auto elapsed = std::chrono::high_resolution_clock::now() - start;
+            auto usec    = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+            std::cout <<"simulation took: "<< usec << std::endl;
+            #endif // GET_STATISTICS
+
+
+            #ifdef GET_STATISTICS
+            start = std::chrono::high_resolution_clock::now();
+            #endif // GET_STATISTICS
             this->cum_fitness = cum_fitness_atomic;
             this->merge(ranges);
-            this->normalize();
+            #ifdef GET_STATISTICS
+            elapsed = std::chrono::high_resolution_clock::now() - start;
+            usec    = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+            std::cout <<"merge took: "<< usec << std::endl;
+            #endif // GET_STATISTICS
 
+
+            #ifdef GET_STATISTICS
+            start = std::chrono::high_resolution_clock::now();
+            #endif // GET_STATISTICS
+            this->normalize();
+            #ifdef GET_STATISTICS
+            elapsed = std::chrono::high_resolution_clock::now() - start;
+            usec    = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+            std::cout <<"normalization took: "<< usec << std::endl;
+            #endif // GET_STATISTICS
+
+
+            #ifdef GET_STATISTICS
+            start = std::chrono::high_resolution_clock::now();
+            #endif // GET_STATISTICS
             tids.clear();
             for(int i=0; i<nw; i++) {                     // assign chuncks to threads
                 tids.push_back(std::thread(reproduction_phase, ranges[i]));
@@ -103,6 +180,11 @@ namespace pga{
             for(std::thread& t: tids) {                        // await thread termination
                 t.join();
             }
+            #ifdef GET_STATISTICS
+            elapsed = std::chrono::high_resolution_clock::now() - start;
+            usec    = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+            std::cout <<"reproduction took: "<< usec << std::endl;
+            #endif // GET_STATISTICS
             this->show_statistics();
             this->cum_fitness = 0.0;
             std::swap(this->current_population, this->new_population);

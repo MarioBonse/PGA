@@ -6,8 +6,8 @@
 #include <random>
 #include <algorithm>
 #include <chrono>
+#include <pga/omp_population.h>
 #include "tspAgent.h"
-#include "pga/population.h"
 #include "utils.h"
 #include <chrono>
 
@@ -26,14 +26,16 @@ int main(int argc, char *argv[]) {
     if(load_config(config_file, config) == -1){
         return -1;
     }
-
+    int nw = 4;
+    if(argc == 4)
+        nw = atoi(argv[3]);
     // show_config(config);
     int iterations = std::stoi(config["iterations"]);
     int chromosome_len = std::stoi(config["chromosome_len"]);
     double p_mutation = std::stod(config["p_mutation"]);
     int number_agent = std::stoi(config["population"]);
 
-    pga::population<pga::TSPAgent> pop(std::stod(config["N_keep_agent"]), number_agent);
+    pga::omp_population<pga::TSPAgent> pop(std::stod(config["N_keep_agent"]), number_agent,  nw);
 
 
     //create the agents
@@ -42,14 +44,14 @@ int main(int argc, char *argv[]) {
         pop.add_agent(my_agent);
     }   
 
-
     auto start = std::chrono::high_resolution_clock::now();
 
-    pop.simulate(iterations);
+    pop.simulate(iterations); 
 
     auto elapsed = std::chrono::high_resolution_clock::now() - start;
     auto usec    = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
     std::cout <<"the whole simulation took: "<< usec << std::endl;
+
     pga::TSPAgent best_agent = pop.best_agent();
     //best_agent.print_solution();
 }

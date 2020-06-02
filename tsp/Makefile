@@ -38,12 +38,13 @@ CXX		= g++ -std=c++17
 INCLUDES	= -I $(FF_ROOT) -I $(PGA_ROOT)
 CXXFLAGS  	= -g -DBLOCKING_MODE -DFF_BOUNDED_BUFFER
 
-LDFLAGS 	= -pthread
+LDFLAGS 	= -pthread -fopenmp
 OPTFLAGS	= -O3 -finline-functions -DNDEBUG
 
 TARGETS		= TSP     \
 		  	TSP_ff \
-			  TSP_thread
+			  TSP_thread \
+			  TSP_parfor
 
 .PHONY: all clean cleanall
 .SUFFIXES: .cpp 
