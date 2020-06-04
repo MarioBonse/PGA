@@ -2,7 +2,6 @@
 #include "population.h"
 #include <thread>
 
-#define GET_STATISTICS
 #ifdef GET_STATISTICS
 #include <chrono>
 #endif

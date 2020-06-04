@@ -31,7 +31,7 @@ FF_ROOT		= ${HOME}/fastflow
 endif
 
 ifndef PGA_ROOT 
-PGA_ROOT	= ${HOME}/fastflow
+PGA_ROOT	= ${HOME}/PGA
 endif
 
 CXX		= g++ -std=c++17 
@@ -53,10 +53,10 @@ TARGETS		= TSP     \
 %: %.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OPTFLAGS) -o build/$@ $< $(LDFLAGS)
 
-all		: $(TARGETS)
+all		: build/$(TARGETS)
 
 clean		: 
-	rm -f $(TARGETS)
+	rm -f build/$(TARGETS)
 
 cleanall	: clean
 	\rm -f *.o *~

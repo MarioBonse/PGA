@@ -1,0 +1,52 @@
+Loading the graph from graph/rat783.tsp
+file read succefully
+DIMENSION   783
+EDGE_WEIGHT_TYPE : EUC_2D
+loading config file 
+population : 10000
+N_keep_agent : 0.1
+p_mutation : 0.1
+iterations : 10
+chromosome_len : 400
+checking config
+simulation took: 211206
+sorting took: 265888
+normalization took: 3325
+reproduce took: 3471800
+simulation took: 248302
+sorting took: 235535
+normalization took: 3293
+reproduce took: 3968702
+simulation took: 261640
+sorting took: 233062
+normalization took: 3214
+reproduce took: 4230787
+simulation took: 268930
+sorting took: 233161
+normalization took: 3208
+reproduce took: 4369419
+simulation took: 273089
+sorting took: 234156
+normalization took: 3174
+reproduce took: 4368084
+simulation took: 275322
+sorting took: 232189
+normalization took: 3439
+reproduce took: 4377723
+simulation took: 274796
+sorting took: 231655
+normalization took: 3183
+reproduce took: 4450886
+simulation took: 275392
+sorting took: 230090
+normalization took: 3182
+reproduce took: 4481068
+simulation took: 276306
+sorting took: 236061
+normalization took: 3236
+reproduce took: 4510412
+simulation took: 279043
+sorting took: 233536
+normalization took: 3261
+reproduce took: 4610320
+the whole simulation took: 47884457

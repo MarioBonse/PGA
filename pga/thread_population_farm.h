@@ -3,7 +3,7 @@
 #include "population.h"
 #include <atomic>
 
-#define GET_STATISTICS
+//#define GET_STATISTICS
 #ifdef GET_STATISTICS
 #include <chrono>
 #endif

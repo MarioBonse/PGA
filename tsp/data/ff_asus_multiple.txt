@@ -1,0 +1,176 @@
+Loading the graph from graph/rat783.tsp
+file read succefully
+DIMENSION   783
+EDGE_WEIGHT_TYPE : EUC_2D
+loading config file 
+population : 10000
+N_keep_agent : 0.1
+p_mutation : 0.1
+iterations : 10
+chromosome_len : 400
+checking config
+After 0 we have an average fitness of 1.00001 max value is: 46396
+After 1 we have an average fitness of 1.00001 max value is: 46396
+After 2 we have an average fitness of 1.00001 max value is: 46396
+After 3 we have an average fitness of 1.00001 max value is: 46396
+After 4 we have an average fitness of 1.00001 max value is: 46396
+After 5 we have an average fitness of 1.00001 max value is: 46396
+After 6 we have an average fitness of 1.00001 max value is: 46396
+After 7 we have an average fitness of 1.00001 max value is: 46396
+After 8 we have an average fitness of 1.00001 max value is: 46396
+After 9 we have an average fitness of 1.00001 max value is: 46396
+the whole simulation took: 15938828
+Loading the graph from graph/rat783.tsp
+file read succefully
+DIMENSION   783
+EDGE_WEIGHT_TYPE : EUC_2D
+loading config file 
+population : 10000
+N_keep_agent : 0.1
+p_mutation : 0.1
+iterations : 10
+chromosome_len : 400
+checking config
+After 0 we have an average fitness of 1.00001 max value is: 42572
+After 1 we have an average fitness of 1.00001 max value is: 42572
+After 2 we have an average fitness of 1.00001 max value is: 42572
+After 3 we have an average fitness of 1.00001 max value is: 42572
+After 4 we have an average fitness of 1.00001 max value is: 42572
+After 5 we have an average fitness of 1.00001 max value is: 42572
+After 6 we have an average fitness of 1.00001 max value is: 42572
+After 7 we have an average fitness of 1.00001 max value is: 42572
+After 8 we have an average fitness of 1.00001 max value is: 42572
+After 9 we have an average fitness of 1.00001 max value is: 42572
+the whole simulation took: 9678632
+Loading the graph from graph/rat783.tsp
+file read succefully
+DIMENSION   783
+EDGE_WEIGHT_TYPE : EUC_2D
+loading config file 
+population : 10000
+N_keep_agent : 0.1
+p_mutation : 0.1
+iterations : 10
+chromosome_len : 400
+checking config
+After 0 we have an average fitness of 1.00001 max value is: 44338
+After 1 we have an average fitness of 1.00001 max value is: 44858
+After 2 we have an average fitness of 1.00001 max value is: 45277
+After 3 we have an average fitness of 1.00001 max value is: 46472
+After 4 we have an average fitness of 1.00001 max value is: 46763
+After 5 we have an average fitness of 1.00001 max value is: 47355
+After 6 we have an average fitness of 1.00001 max value is: 47643
+After 7 we have an average fitness of 1.00001 max value is: 47937
+After 8 we have an average fitness of 1.00001 max value is: 48049
+After 9 we have an average fitness of 1.00001 max value is: 48412
+the whole simulation took: 7936577
+Loading the graph from graph/rat783.tsp
+file read succefully
+DIMENSION   783
+EDGE_WEIGHT_TYPE : EUC_2D
+loading config file 
+population : 10000
+N_keep_agent : 0.1
+p_mutation : 0.1
+iterations : 10
+chromosome_len : 400
+checking config
+After 0 we have an average fitness of 1.00001 max value is: 40403
+After 1 we have an average fitness of 1.00001 max value is: 40403
+After 2 we have an average fitness of 1.00001 max value is: 40403
+After 3 we have an average fitness of 1.00001 max value is: 40403
+After 4 we have an average fitness of 1.00001 max value is: 40403
+After 5 we have an average fitness of 1.00001 max value is: 40403
+After 6 we have an average fitness of 1.00001 max value is: 40403
+After 7 we have an average fitness of 1.00001 max value is: 40403
+After 8 we have an average fitness of 1.00001 max value is: 40403
+After 9 we have an average fitness of 1.00001 max value is: 40403
+the whole simulation took: 5912519
+Loading the graph from graph/rat783.tsp
+file read succefully
+DIMENSION   783
+EDGE_WEIGHT_TYPE : EUC_2D
+loading config file 
+population : 10000
+N_keep_agent : 0.1
+p_mutation : 0.1
+iterations : 10
+chromosome_len : 400
+checking config
+After 0 we have an average fitness of 1.00001 max value is: 46159
+After 1 we have an average fitness of 1.00001 max value is: 46159
+After 2 we have an average fitness of 1.00001 max value is: 46159
+After 3 we have an average fitness of 1.00001 max value is: 46159
+After 4 we have an average fitness of 1.00001 max value is: 46159
+After 5 we have an average fitness of 1.00001 max value is: 46159
+After 6 we have an average fitness of 1.00001 max value is: 46159
+After 7 we have an average fitness of 1.00001 max value is: 46159
+After 8 we have an average fitness of 1.00001 max value is: 46159
+After 9 we have an average fitness of 1.00001 max value is: 46159
+the whole simulation took: 6920929
+Loading the graph from graph/rat783.tsp
+file read succefully
+DIMENSION   783
+EDGE_WEIGHT_TYPE : EUC_2D
+loading config file 
+population : 10000
+N_keep_agent : 0.1
+p_mutation : 0.1
+iterations : 10
+chromosome_len : 400
+checking config
+After 0 we have an average fitness of 1.00001 max value is: 46097
+After 1 we have an average fitness of 1.00001 max value is: 48136
+After 2 we have an average fitness of 1.00001 max value is: 48854
+After 3 we have an average fitness of 1.00001 max value is: 49138
+After 4 we have an average fitness of 1.00001 max value is: 49383
+After 5 we have an average fitness of 1.00001 max value is: 49689
+After 6 we have an average fitness of 1.00001 max value is: 50234
+After 7 we have an average fitness of 1.00001 max value is: 50660
+After 8 we have an average fitness of 1.00001 max value is: 51125
+After 9 we have an average fitness of 1.00001 max value is: 51228
+the whole simulation took: 7375005
+Loading the graph from graph/rat783.tsp
+file read succefully
+DIMENSION   783
+EDGE_WEIGHT_TYPE : EUC_2D
+loading config file 
+population : 10000
+N_keep_agent : 0.1
+p_mutation : 0.1
+iterations : 10
+chromosome_len : 400
+checking config
+After 0 we have an average fitness of 1.00001 max value is: 45222
+After 1 we have an average fitness of 1.00001 max value is: 49075
+After 2 we have an average fitness of 1.00001 max value is: 49676
+After 3 we have an average fitness of 1.00001 max value is: 50310
+After 4 we have an average fitness of 1.00001 max value is: 50997
+After 5 we have an average fitness of 1.00001 max value is: 51327
+After 6 we have an average fitness of 1.00001 max value is: 51849
+After 7 we have an average fitness of 1.00001 max value is: 52104
+After 8 we have an average fitness of 1.00001 max value is: 52405
+After 9 we have an average fitness of 1.00001 max value is: 52544
+the whole simulation took: 7351030
+Loading the graph from graph/rat783.tsp
+file read succefully
+DIMENSION   783
+EDGE_WEIGHT_TYPE : EUC_2D
+loading config file 
+population : 10000
+N_keep_agent : 0.1
+p_mutation : 0.1
+iterations : 10
+chromosome_len : 400
+checking config
+After 0 we have an average fitness of 1.00001 max value is: 43942
+After 1 we have an average fitness of 1.00001 max value is: 43942
+After 2 we have an average fitness of 1.00001 max value is: 43942
+After 3 we have an average fitness of 1.00001 max value is: 43942
+After 4 we have an average fitness of 1.00001 max value is: 43942
+After 5 we have an average fitness of 1.00001 max value is: 43942
+After 6 we have an average fitness of 1.00001 max value is: 43942
+After 7 we have an average fitness of 1.00001 max value is: 43942
+After 8 we have an average fitness of 1.00001 max value is: 43942
+After 9 we have an average fitness of 1.00001 max value is: 43942
+the whole simulation took: 6556327

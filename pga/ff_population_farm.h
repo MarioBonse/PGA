@@ -123,17 +123,21 @@ namespace pga{
         ff_population_farm<T>*P;
         task<T>* svc(task<T>* run) {
             std::vector<T> app;
-            app.reserve(P->current_population.size());
+            app.reserve(run->A.size() + global_result.size());
             std::merge(run->A.begin(), run->A.end(), global_result.begin(), global_result.end(), std::back_inserter(app),  std::greater<T>());
-            std::swap(global_result, app);
+            global_result.swap(global_result, app);
             #ifdef DEBUG
             std::cout<<"reciving from simuatioon\n";
             #endif // DEBUG
             P->cum_fitness += run->extra_data.cum_fitness;
             delete run;
             if(global_result.size() ==  P->current_population.size()){
-
-                P->current_population = global_result;
+                #ifdef GET_STATISTICS
+                ff::ffTime(ff::STOP_TIME);
+                std::cout << "simulation plus merging took: " << ff::ffTime(ff::GET_TIME) << " (ms)\n";
+                ff::ffTime(ff::START_TIME);
+                #endif // GET_STATISTICS
+                P->current_population.swap(global_result);
                 P->normalize();
                 // send out again
                 #ifdef DEBUG
@@ -172,7 +176,9 @@ namespace pga{
                 #ifdef DEBUG
                 std::cout<<"Start [only once] sending out from emitter to sim\n";
                 #endif // DEBUG
-
+                #ifdef GET_STATISTICS
+                ff::ffTime(ff::START_TIME);
+                #endif // GET_STATISTICS
                 int step = P->current_population.size()/P->workers;
                 for(int new_start = 0; new_start < P->current_population.size(); new_start += step) {
                     this->ff_send_out(new task<T>(P, step, new_start));
@@ -193,7 +199,11 @@ namespace pga{
             if(current_index < P->current_population.size()){
                 return this->GO_ON;
             }     
-            
+            #ifdef GET_STATISTICS
+            ff::ffTime(ff::STOP_TIME);
+            std::cout << "reproduction took: " << ff::ffTime(ff::GET_TIME) << " (ms)\n";
+            #endif // GET_STATISTICS
+
             //eventually, if we still have iterations to do, we send the data again
             if(curr_iteration < P->curr_iterations){
                 current_index = 0;
@@ -207,6 +217,10 @@ namespace pga{
                 std::cout<<"seding again. new iteration. TO simulate\n";
                 #endif // DEBUG
 
+                #ifdef GET_STATISTICS
+                ff::ffTime(ff::START_TIME);
+                #endif // GET_STATISTICS
+                
                 for(int new_start = 0; new_start < P->current_population.size(); new_start += step) {
                     this->ff_send_out(new task<T>(P, step, new_start));
                 }
