@@ -125,7 +125,7 @@ namespace pga{
             std::vector<T> app;
             app.reserve(run->A.size() + global_result.size());
             std::merge(run->A.begin(), run->A.end(), global_result.begin(), global_result.end(), std::back_inserter(app),  std::greater<T>());
-            global_result.swap(global_result, app);
+            global_result.swap(app);
             #ifdef DEBUG
             std::cout<<"reciving from simuatioon\n";
             #endif // DEBUG
