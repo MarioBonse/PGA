@@ -31,7 +31,7 @@ namespace pga{
         void simulate(int);
     };
 
-    union task_type{
+    struct task_type{
         int index;
         double cum_fitness;
     };
@@ -49,7 +49,7 @@ namespace pga{
     };
 
     // code of one of the worker of the farm. It takes a group of agent and simulate 
-    // their behaviur, calculate the cumulative fitness and send the sorted agent with the cum fitness
+    // their behaviur, calculate the cumulative fitness and send the agent with the cum fitness
     template <typename T> struct simulation_ : ff::ff_node_t<task<T>>{
         simulation_(pga::ff_population_farm<T> *Pop){P = Pop;};
         pga::ff_population_farm<T>*P;
@@ -61,7 +61,7 @@ namespace pga{
                 if(P->norm_type == linear)cum_fitness += run->A[i].get_fitness();
                 else if (P->norm_type == softmax) cum_fitness += exp(run->A[i].get_fitness());
             }
-            std::sort(run->A.begin(), run->A.end(), std::greater<T>());
+            //std::sort(run->A.begin(), run->A.end(), std::greater<T>());
             // the reduce like seaction
             run->extra_data.cum_fitness = cum_fitness;
             //write cumulative fitness
@@ -121,23 +121,39 @@ namespace pga{
         collector_emitter(ff_population_farm<T> *Pop){P = Pop;};
         std::vector<T> global_result;
         ff_population_farm<T>*P;
+        int current_index = 0;
         task<T>* svc(task<T>* run) {
-            std::vector<T> app;
-            app.reserve(run->A.size() + global_result.size());
-            std::merge(run->A.begin(), run->A.end(), global_result.begin(), global_result.end(), std::back_inserter(app),  std::greater<T>());
-            global_result.swap(global_result, app);
+            // std::vector<T> app;
+            // app.reserve(run->A.size() + global_result.size());
+            // std::merge(run->A.begin(), run->A.end(), global_result.begin(), global_result.end(), std::back_inserter(app),  std::greater<T>());
+            // global_result.swap(global_result, app);
+
+            // merging the results
+            for(int i = 0; i < run->A.size(); i++ ){
+                P->current_population[current_index] = run->A[i];
+                current_index++;
+            }
+            P->cum_fitness += run->extra_data.cum_fitness;
+            delete run;
             #ifdef DEBUG
             std::cout<<"reciving from simuatioon\n";
             #endif // DEBUG
-            P->cum_fitness += run->extra_data.cum_fitness;
-            delete run;
-            if(global_result.size() ==  P->current_population.size()){
+
+            if(current_index == P->current_population.size()){
                 #ifdef GET_STATISTICS
                 ff::ffTime(ff::STOP_TIME);
-                std::cout << "simulation plus merging took: " << ff::ffTime(ff::GET_TIME) << " (ms)\n";
+                std::cout << "simulation took: " << ff::ffTime(ff::GET_TIME) << " (ms)\n";
                 ff::ffTime(ff::START_TIME);
                 #endif // GET_STATISTICS
-                P->current_population.swap(global_result);
+                current_index = 0;
+
+                P->sort();
+
+                #ifdef GET_STATISTICS
+                ff::ffTime(ff::STOP_TIME);
+                std::cout << "sorting took: " << ff::ffTime(ff::GET_TIME) << " (ms)\n";
+                ff::ffTime(ff::START_TIME);
+                #endif // GET_STATISTICS
                 P->normalize();
                 // send out again
                 #ifdef DEBUG
@@ -150,7 +166,6 @@ namespace pga{
                 #ifdef DEBUG
                 std::cout<<"send all to reproduction\n";
                 #endif // DEBUG
-                global_result.clear();
 
             }
             return this->GO_ON;
@@ -206,12 +221,12 @@ namespace pga{
 
             //eventually, if we still have iterations to do, we send the data again
             if(curr_iteration < P->curr_iterations){
+                curr_iteration ++;
                 current_index = 0;
                 P->iterations = curr_iteration;
                 P->show_statistics();
                 std::swap(P->current_population, P->new_population);
                 P->cum_fitness = 0.0;
-                curr_iteration ++;
                 int step = P->current_population.size()/P->workers;
                 #ifdef DEBUG
                 std::cout<<"seding again. new iteration. TO simulate\n";

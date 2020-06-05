@@ -8,7 +8,7 @@
 #include <math.h> 
 enum normalization { linear, softmax};
 
-#define GET_STATISTICS
+//#define GET_STATISTICS
 #ifdef GET_STATISTICS
 #include <chrono>
 #endif

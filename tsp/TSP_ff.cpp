@@ -6,7 +6,7 @@
 #include <random>
 #include <algorithm>
 #include <chrono>
-#include "pga/ff_population_farm.h"
+#include "pga/ff_population_farm2.h"
 #include "tspAgent.h"
 #include "utils.h"
 #include <chrono>
