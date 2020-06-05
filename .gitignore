@@ -40,6 +40,6 @@ TSP_thread
 tsp/build/*
 
 tmp 
-tsp/data
+tsp/data/*.txt
 tsp/.ipynb_checkpoints
 pga/to_delete
