@@ -18,14 +18,11 @@
 namespace pga{
     template <class agent_type> 
     struct ff_population_farm : population<agent_type> {
-        Barrier my_barrier;
         int curr_iterations;
-
+        int nw;
         ff_population_farm(double P_to_keep, int number_agent, int nw): population<agent_type>(P_to_keep, number_agent)
-        {
-            
+        { 
             this->workers = nw;
-            my_barrier.set_barrier(nw);
         };
 
         void simulate(int);

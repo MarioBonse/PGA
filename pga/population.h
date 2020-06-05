@@ -49,7 +49,7 @@ namespace pga{
 
         T best_agent(); //return the best agent from the previus simulation
 
-        void simulate(int);
+        void virtual simulate(int);
         void show_statistics();
 
     };

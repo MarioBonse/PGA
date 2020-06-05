@@ -8,11 +8,6 @@
 
 namespace pga{
 
-    typedef struct {
-        int start;
-        int end;
-    }RANGE;
-
 
     template <typename T> 
     struct omp_population : population<T> {
@@ -25,20 +20,9 @@ namespace pga{
             this->workers = nw;
             //my_barrier.set_barrier(nw);
         };
-
-        void merge(std::vector<RANGE> &);
         void simulate(int);
     };
 
-
-    template <typename T>
-    void omp_population<T>::merge(std::vector<RANGE> & range){
-        int start = range[0].end;
-        for(int i = 1; i < range.size(); i++){
-            std::inplace_merge(this->current_population.begin(), this->current_population.begin() + range[i].start,
-                this->current_population.begin() + range[i].end, std::greater<T>());
-        }
-    }
 }
 
 template <class T> 
