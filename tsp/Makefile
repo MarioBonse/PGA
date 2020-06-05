@@ -26,6 +26,9 @@
 # 
 # FF_ROOT     points to the FastFlow root directory (i.e.
 #             the one containing the ff directory).
+#
+# PGA_ROOT points to the parallel genetic algorithm root direcotory
+
 ifndef FF_ROOT 
 FF_ROOT		= ${HOME}/fastflow
 endif
@@ -41,7 +44,7 @@ CXXFLAGS  	= -g -DBLOCKING_MODE -DFF_BOUNDED_BUFFER
 LDFLAGS 	= -pthread -fopenmp
 OPTFLAGS	= -O3 -finline-functions -DNDEBUG
 
-TARGETS		= TSP     \
+TARGETS		= TSP \
 		  	TSP_ff \
 			  TSP_thread \
 			  TSP_parfor
@@ -53,10 +56,10 @@ TARGETS		= TSP     \
 %: %.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OPTFLAGS) -o build/$@ $< $(LDFLAGS)
 
-all		: build/$(TARGETS)
+all		: $(TARGETS)
 
 clean		: 
-	rm -f build/$(TARGETS)
+	rm -f build/*
 
 cleanall	: clean
 	\rm -f *.o *~

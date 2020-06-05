@@ -4,12 +4,19 @@
 #include <random>
 #include <pga/agent.h>
 
+/*
+here we override the method from agent.h and 
+we have also a lot of usefull methods
+*/
+
 namespace pga{
     class TSPAgent : public Agent<TSPAgent> {
-        void random_DNA();
+
         int size;
         int chromosome_length;
         std::vector<int> DNA;
+
+        void random_DNA();
         void mutate();
         void greedy_DNA();
         int find_nearer_avail_node(int starting_node, std::vector<int> visited);

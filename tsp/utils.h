@@ -9,6 +9,8 @@
 #include <sstream>
 #include <vector>
 
+//utility functions for reading the files
+
 void split(const std::string&, std::vector<std::string>& , char);
 
 int check_config(std::map<std::string, std::string> &);

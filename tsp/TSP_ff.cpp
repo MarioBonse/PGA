@@ -6,11 +6,18 @@
 #include <random>
 #include <algorithm>
 #include <chrono>
-#include "pga/ff_population_farm3.h"
+#include <pga/ff_population_farm2.h>
 #include "tspAgent.h"
 #include "utils.h"
 #include <chrono>
 
+/*
+There is a main file for each implementation.
+This is the fast flow version. 
+The only differences between the files are: the library imported
+And the sequential version has a sliglty different initializer, where you can't set the number 
+of worker
+*/
 
 int main(int argc, char *argv[]) {    
     if (argc<3) {

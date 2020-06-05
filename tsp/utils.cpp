@@ -3,6 +3,8 @@
 
 #include "utils.h"
 
+
+// split a sting into a vector giveng also the delimiter
 void split(const std::string& str, std::vector<std::string>& cont, char delim = ' ')
 {
     std::stringstream ss(str);
@@ -12,6 +14,8 @@ void split(const std::string& str, std::vector<std::string>& cont, char delim = 
     }
 }
 
+
+// check wether the config file has all the important parts
 int check_config(std::map<std::string, std::string> &config){
     std::cout<<"checking config\n";
     std::vector<std::string> must_include = {"population", "N_keep_agent", "p_mutation", "iterations"};
@@ -29,6 +33,11 @@ int check_config(std::map<std::string, std::string> &config){
     return 0;
 }
 
+
+//
+// given the name of the config file this function create a dictionary
+// with key the name of the config and value the value
+// 
 int load_config(std::string file_name, std::map<std::string, std::string> &config){
     std::cout<<"loading config file \n";
     std::ifstream config_file;
@@ -56,10 +65,20 @@ int load_config(std::string file_name, std::map<std::string, std::string> &confi
     return check_config(config);
 }
 
+//
+// return the distance between two cities in cartesian coordinate
+// It returns an int because the distance are guaranteed to be integer
+// see for more http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/index.html
+//
 int distance(std::pair<int, int> x, std::pair<int, int> y){
     return int(sqrt((x.first - y.first)*(x.first - y.first) + (x.second - y.second)*(x.second - y.second)));
 }
 
+
+// 
+// given the list of cities in cartesian coordinate it returns
+// a matric represantation for the graph
+// 
 void from_point_to_matrix(std::vector<std::pair<int, int>> points, std::vector<std::vector<int>> &graph){
     for(int i = 0; i<points.size(); i++){
         std::vector<int> row;
@@ -70,6 +89,7 @@ void from_point_to_matrix(std::vector<std::pair<int, int>> points, std::vector<s
     }
 }
 
+//
 int load_graph(std::string graph_path, std::vector<std::vector<int>> &graph){
     std::cout<<"Loading the graph from "<<graph_path<<std::endl;
     std::ifstream file;
