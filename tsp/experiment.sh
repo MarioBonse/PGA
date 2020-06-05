@@ -9,5 +9,5 @@ do
     echo $i
   # ./build/TSP_thread graph/rat783.tsp config.txt $i >> data/thread_asus_multiple.txt
   # ./build/TSP_parfor graph/rat783.tsp config.txt $i >> data/omp_asus_multiple.txt
-  ./build/TSP_ff graph/rat783.tsp config.txt $i >> data/ff_asus_multiple_v2.txt
+  ./build/TSP_ff graph/rat783.tsp config.txt $i >> data/ff_asus_multiple_v3.txt
 done

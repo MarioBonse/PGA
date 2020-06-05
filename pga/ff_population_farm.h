@@ -132,12 +132,20 @@ namespace pga{
             P->cum_fitness += run->extra_data.cum_fitness;
             delete run;
             if(global_result.size() ==  P->current_population.size()){
-                #ifdef GET_STATISTICS
+                                #ifdef GET_STATISTICS
                 ff::ffTime(ff::STOP_TIME);
-                std::cout << "simulation plus merging took: " << ff::ffTime(ff::GET_TIME) << " (ms)\n";
+                std::cout << "simulation took: " << ff::ffTime(ff::GET_TIME) << " (ms)\n";
                 ff::ffTime(ff::START_TIME);
                 #endif // GET_STATISTICS
-                P->current_population.swap(global_result);
+                current_index = 0;
+
+                P->sort();
+
+                #ifdef GET_STATISTICS
+                ff::ffTime(ff::STOP_TIME);
+                std::cout << "sorting took: " << ff::ffTime(ff::GET_TIME) << " (ms)\n";
+                ff::ffTime(ff::START_TIME);
+                #endif // GET_STATISTICS
                 P->normalize();
                 // send out again
                 #ifdef DEBUG

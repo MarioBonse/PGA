@@ -13,6 +13,11 @@ enum normalization { linear, softmax};
 #include <chrono>
 #endif
 
+
+/* 
+Base class for the population. With this class we manage the training of the population.
+This is the sequential version
+*/
 namespace pga{
     template <typename T> struct population{
         public:
@@ -23,9 +28,10 @@ namespace pga{
         
         std::uniform_real_distribution<> dis{double(0.0) , double(1.0)};
 
+        // vector of agents for the current timulation
         std::vector<T> current_population;
         std::vector<T> new_population;
-        // cumulative fitness
+        // cumulative fitness. Important for normalization
         double cum_fitness; 
         int iterations;
         double percentage_to_keep;
@@ -56,6 +62,9 @@ namespace pga{
 }
 
 
+/*
+Show the statistics of the current iteration.
+*/
 template <class T> 
 void pga::population<T>::show_statistics(){
     double avg_fitness = cum_fitness/double(current_population.size());
@@ -65,12 +74,17 @@ void pga::population<T>::show_statistics(){
     std::cout<<std::endl;
 }
 
+
+/*
+Normalize
+*/
 template <class T> 
 void pga::population<T>::normalize(){
     if(norm_type == linear)linear_normalize();
     else if (norm_type == softmax)softmax_normalize();
     else std::cerr<<"Normalization not supported\n";
 }
+
 
 template <class T> 
 void pga::population<T>::linear_normalize(){

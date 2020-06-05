@@ -3,6 +3,11 @@
 #include <random>
 #include <iostream>
 
+
+/*
+Abstract class for the agents. 
+simulate and reproduce has to be overwritten
+*/
 namespace pga{
     template <typename T> class Agent{
         public:
