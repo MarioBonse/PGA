@@ -243,7 +243,6 @@ namespace pga{
 
     template <class T> 
     void pga::ff_population_farm<T>::simulate(int iter){
-        ff::OptLevel opt;
         //opt.blocking_mode = true;
         this->curr_iterations = 0;
         this->size = this->size;
@@ -268,8 +267,6 @@ namespace pga{
         reprodcution_farm.remove_collector();
 
         ff::ff_Pipe pipe(simulation_farm, reprodcution_farm);
-
-        ff::optimize_static(pipe, opt);
 
         pipe.wrap_around();
         if (pipe.run_and_wait_end()<0) {
