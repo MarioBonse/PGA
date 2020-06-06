@@ -15,6 +15,12 @@
 
 // #define DEBUG 
 
+/*
+This is the old version of the fast flow implementation. 
+I discarded this implementation because the merging phase was too slow therefore
+was far better just sorting the whole population
+*/
+
 namespace pga{
     template <class agent_type> 
     struct ff_population_farm : population<agent_type> {
@@ -121,23 +127,24 @@ namespace pga{
         collector_emitter(ff_population_farm<T> *Pop){P = Pop;};
         std::vector<T> global_result;
         ff_population_farm<T>*P;
+
         task<T>* svc(task<T>* run) {
             std::vector<T> app;
             app.reserve(run->A.size() + global_result.size());
             std::merge(run->A.begin(), run->A.end(), global_result.begin(), global_result.end(), std::back_inserter(app),  std::greater<T>());
-            global_result.swap(global_result, app);
+            global_result.swap(app);
             #ifdef DEBUG
             std::cout<<"reciving from simuatioon\n";
             #endif // DEBUG
             P->cum_fitness += run->extra_data.cum_fitness;
             delete run;
             if(global_result.size() ==  P->current_population.size()){
-                                #ifdef GET_STATISTICS
+                
+                #ifdef GET_STATISTICS
                 ff::ffTime(ff::STOP_TIME);
                 std::cout << "simulation took: " << ff::ffTime(ff::GET_TIME) << " (ms)\n";
                 ff::ffTime(ff::START_TIME);
                 #endif // GET_STATISTICS
-                current_index = 0;
 
                 P->sort();
 
@@ -146,6 +153,7 @@ namespace pga{
                 std::cout << "sorting took: " << ff::ffTime(ff::GET_TIME) << " (ms)\n";
                 ff::ffTime(ff::START_TIME);
                 #endif // GET_STATISTICS
+
                 P->normalize();
                 // send out again
                 #ifdef DEBUG
@@ -215,11 +223,12 @@ namespace pga{
             //eventually, if we still have iterations to do, we send the data again
             if(curr_iteration < P->curr_iterations){
                 current_index = 0;
+                curr_iteration ++;
                 P->iterations = curr_iteration;
                 P->show_statistics();
-                std::swap(P->current_population, P->new_population);
+                P->current_population.swap(P->new_population);
                 P->cum_fitness = 0.0;
-                curr_iteration ++;
+
                 int step = P->current_population.size()/P->workers;
                 #ifdef DEBUG
                 std::cout<<"seding again. new iteration. TO simulate\n";
@@ -246,9 +255,7 @@ namespace pga{
         this->size = this->current_population.size();
         emitter<T> E(this, this->curr_iterations);
         collector_emitter<T> CE(this);
-        #ifdef DEBUG
-        std::cout<<"simulationg...\n";
-        #endif // DEBUG
+
         std::vector<std::unique_ptr<ff::ff_node>> S;
         for(int i = 0; i < this->workers; i++)S.push_back(ff::make_unique<simulation_<T>>(this));
 

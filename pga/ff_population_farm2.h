@@ -36,7 +36,7 @@ namespace pga{
     template <class T> struct task{
         task(ff_population_farm<T>*P, int step, int start){
             A.reserve(step);
-            for(int i = 0; i + start < P->current_population.size() && i<step; i++)
+            for(int i = 0; i + start < P->size && i<step; i++)
                 A.push_back(P->current_population[start + i]);
             extra_data.index = start/step;
         }
@@ -136,7 +136,7 @@ namespace pga{
             std::cout<<"reciving from simuatioon\n";
             #endif // DEBUG
 
-            if(current_index == P->current_population.size()){
+            if(current_index == P->size){
                 #ifdef GET_STATISTICS
                 ff::ffTime(ff::STOP_TIME);
                 std::cout << "simulation took: " << ff::ffTime(ff::GET_TIME) << " (ms)\n";
@@ -156,8 +156,8 @@ namespace pga{
                 #ifdef DEBUG
                 std::cout<<"sending to reproduction\n";
                 #endif // DEBUG
-                int step = P->current_population.size()/P->workers;
-                for(int new_start = 0; new_start < P->current_population.size(); new_start += step) {
+                int step = P->size/P->workers;
+                for(int new_start = 0; new_start < P->size; new_start += step) {
                     this->ff_send_out(new task<T>(P, step, new_start));
                 }
                 #ifdef DEBUG
@@ -175,27 +175,27 @@ namespace pga{
     // emitter: this function send the agents from current_population 
     // to the simulation section which is a farm. 
     template <typename T> struct emitter : ff::ff_node_t<task<T>>{
-        emitter(pga::ff_population_farm<T> *Pop, int iter){P = Pop;};
+        emitter(pga::ff_population_farm<T> *Pop, int iter):P(Pop),iterations(iter){};
 
         // int iterations;
         pga::ff_population_farm<T>*P;
         int current_index = 0;
         int curr_iteration = 0;
+        int iterations;
 
         task<T>* svc(task<T>* run) {
             if(run == nullptr){//sendo out the first time
-                current_index++;
                 #ifdef DEBUG
                 std::cout<<"Start [only once] sending out from emitter to sim\n";
                 #endif // DEBUG
+                
                 #ifdef GET_STATISTICS
                 ff::ffTime(ff::START_TIME);
                 #endif // GET_STATISTICS
-                int step = P->current_population.size()/P->workers;
-                for(int new_start = 0; new_start < P->current_population.size(); new_start += step) {
+                int step = P->size/P->workers;
+                for(int new_start = 0; new_start < P->size; new_start += step) {
                     this->ff_send_out(new task<T>(P, step, new_start));
                 }
-                current_index = 0;
                 return this->GO_ON; 
             }
             // copy the result into new_population
@@ -208,32 +208,31 @@ namespace pga{
             }
             delete run;
             //until we don't fill the new population vector we just merge it
-            if(current_index < P->current_population.size()){
+            if(current_index < P->size){
                 return this->GO_ON;
             }     
-            #ifdef GET_STATISTICS
-            ff::ffTime(ff::STOP_TIME);
-            std::cout << "reproduction took: " << ff::ffTime(ff::GET_TIME) << " (ms)\n";
-            #endif // GET_STATISTICS
+
 
             //eventually, if we still have iterations to do, we send the data again
-            if(curr_iteration < P->curr_iterations){
+            if(curr_iteration < iterations){
                 curr_iteration ++;
                 current_index = 0;
                 P->iterations = curr_iteration;
                 P->show_statistics();
-                std::swap(P->current_population, P->new_population);
+                P->current_population.swap(P->new_population);
                 P->cum_fitness = 0.0;
-                int step = P->current_population.size()/P->workers;
+                int step = P->size/P->workers;
                 #ifdef DEBUG
                 std::cout<<"seding again. new iteration. TO simulate\n";
                 #endif // DEBUG
 
                 #ifdef GET_STATISTICS
+                ff::ffTime(ff::STOP_TIME);
+                std::cout << "reproduction took: " << ff::ffTime(ff::GET_TIME) << " (ms)\n";
                 ff::ffTime(ff::START_TIME);
                 #endif // GET_STATISTICS
                 
-                for(int new_start = 0; new_start < P->current_population.size(); new_start += step) {
+                for(int new_start = 0; new_start < P->size; new_start += step) {
                     this->ff_send_out(new task<T>(P, step, new_start));
                 }
                 return this->GO_ON; 
@@ -245,17 +244,16 @@ namespace pga{
     template <class T> 
     void pga::ff_population_farm<T>::simulate(int iter){
         ff::OptLevel opt;
-        opt.blocking_mode = true;
-        this->curr_iterations = iter;
-        this->size = this->current_population.size();
-        emitter<T> E(this, this->curr_iterations);
+        //opt.blocking_mode = true;
+        this->curr_iterations = 0;
+        this->size = this->size;
+        emitter<T> E(this, iter);
         collector_emitter<T> CE(this);
-        #ifdef DEBUG
-        std::cout<<"simulationg...\n";
-        #endif // DEBUG
+         // create the farm for the simulation phase
         std::vector<std::unique_ptr<ff::ff_node>> S;
         for(int i = 0; i < this->workers; i++)S.push_back(ff::make_unique<simulation_<T>>(this));
 
+        // farm for the reproduction phase
         std::vector<std::unique_ptr<ff::ff_node>> R;
         for(int i = 0; i < this->workers; i++)R.push_back(ff::make_unique<reproduce_<T>>(this));
         // create the farm and remove the collector

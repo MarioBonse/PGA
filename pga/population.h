@@ -8,7 +8,7 @@
 #include <math.h> 
 enum normalization { linear, softmax};
 
-//#define GET_STATISTICS
+#define GET_STATISTICS
 #ifdef GET_STATISTICS
 #include <chrono>
 #endif
@@ -33,7 +33,7 @@ namespace pga{
         std::vector<T> new_population;
         // cumulative fitness. Important for normalization
         double cum_fitness; 
-        int iterations;
+        int iterations = 0;
         double percentage_to_keep;
         normalization norm_type = softmax;
 
@@ -145,7 +145,6 @@ void pga::population<T>::simulate(int iter){
         #endif // GET_STATISTICS
         // reproduce
         // create the pool of parents
-        iterations++;
 
         #ifdef GET_STATISTICS
         start = std::chrono::high_resolution_clock::now();
@@ -193,6 +192,7 @@ void pga::population<T>::simulate(int iter){
         std::cout <<"reproduce took: "<< usec << std::endl;
         #endif // GET_STATISTICS
 
+        iterations++;
         #ifndef GET_STATISTICS
         show_statistics();
         #endif // GET_STATISTICS

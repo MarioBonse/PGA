@@ -83,9 +83,9 @@ namespace pga{
     }
 
     template <typename T>
-    void thread_population<T>::simulate(int iterations){
+    void thread_population<T>::simulate(int iter){
 
-        for(int i = 0; i< iterations; i++){
+        for(int i = 0; i< iter; i++){
 
             std::atomic<double> cum_fitness_atomic{0.0};
 
@@ -185,9 +185,11 @@ namespace pga{
             usec    = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
             std::cout <<"reproduction took: "<< usec << std::endl;
             #endif // GET_STATISTICS
+            
+            this->iterations++;
             this->show_statistics();
             this->cum_fitness = 0.0;
-            std::swap(this->current_population, this->new_population);
+            this->current_population.swap(this->new_population);
 
         }
     }   
