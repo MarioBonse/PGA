@@ -20,13 +20,13 @@ namespace pga{
             this->workers = nw;
             //my_barrier.set_barrier(nw);
         };
-        void simulate(int);
+        void train(int);
     };
 
 }
 
 template <class T> 
-void pga::omp_population<T>::simulate(int iter){
+void pga::omp_population<T>::train(int iter){
     for(int i = 0; i<iter; i++){
         this->cum_fitness = 0.0;
         #ifdef GET_STATISTICS

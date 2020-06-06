@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    sequential_population.simulate(iterations); 
+    sequential_population.train(iterations); 
 
     auto elapsed = std::chrono::high_resolution_clock::now() - start;
     auto usec    = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
         auto start = std::chrono::high_resolution_clock::now();
         farm_population.nw = n;
         farm_population.workers = n;
-        farm_population.simulate(iterations); 
+        farm_population.train(iterations); 
 
         auto elapsed = std::chrono::high_resolution_clock::now() - start;
         auto usec    = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
         start = std::chrono::high_resolution_clock::now();
         omp_population.nw = n;
         omp_population.workers = n;
-        omp_population.simulate(iterations); 
+        omp_population.train(iterations); 
 
         elapsed = std::chrono::high_resolution_clock::now() - start;
         usec    = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
         start = std::chrono::high_resolution_clock::now();
         thread_population.nw = n;
         thread_population.workers = n;
-        thread_population.simulate(iterations); 
+        thread_population.train(iterations); 
 
         elapsed = std::chrono::high_resolution_clock::now() - start;
         usec    = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();

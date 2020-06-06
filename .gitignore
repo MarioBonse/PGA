@@ -43,3 +43,4 @@ tmp
 tsp/data/*.txt
 tsp/.ipynb_checkpoints
 pga/to_delete
+tsp/plot_speedup.ipynb

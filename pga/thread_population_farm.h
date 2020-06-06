@@ -29,7 +29,7 @@ namespace pga{
         };
 
         void merge(std::vector<RANGE> &);
-        void simulate(int);
+        void train(int);
     };
 
 
@@ -83,7 +83,7 @@ namespace pga{
     }
 
     template <typename T>
-    void thread_population<T>::simulate(int iter){
+    void thread_population<T>::train(int iter){
 
         for(int i = 0; i< iter; i++){
 
@@ -119,8 +119,11 @@ namespace pga{
 
                     for(int i = r.start; i < r.end; i++){
                     // if we can't divide the agents to keep we add the spare part to the first worker
-                        if(i < number_to_copy){
-                            this->new_population[i] = this->current_population[index * number_to_copy + i + extra_shift];
+
+                    // the first 'number_to_copy' agents of the chunks are the best corrisponding from the
+                    //previus iteration
+                        if((i - r.start)< number_to_copy){
+                            this->new_population[i] = this->current_population[index * number_to_copy + (i - r.start) + bool(index)*extra_shift];
                         }else{
                             int index1 = this->pick_random_parent();
                             int index2 = this->pick_random_parent();
@@ -151,6 +154,7 @@ namespace pga{
             #endif // GET_STATISTICS
             this->cum_fitness = cum_fitness_atomic;
             this->merge(ranges);
+
             #ifdef GET_STATISTICS
             elapsed = std::chrono::high_resolution_clock::now() - start;
             usec    = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();

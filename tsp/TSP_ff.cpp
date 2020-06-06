@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    pop.simulate(iterations); 
+    pop.train(iterations); 
 
     auto elapsed = std::chrono::high_resolution_clock::now() - start;
     auto usec    = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();

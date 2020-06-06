@@ -25,7 +25,7 @@ namespace pga{
             this->workers = nw;
         };
 
-        void simulate(int);
+        void train(int);
     };
 
     struct task_type{
@@ -99,7 +99,7 @@ namespace pga{
             if(index == 0)number_to_copy += extra_shift;
             for(int i = 0; i < run->A.size(); i++){
                 if(i < number_to_copy){
-                    run->A[i] = P->current_population[run->extra_data.index*number_to_copy + i + extra_shift];
+                    run->A[i] = P->current_population[run->extra_data.index*number_to_copy + i + bool(run->extra_data.index)*extra_shift];
                 }else{
                     int index1 = P->pick_random_parent();
                     int index2 = P->pick_random_parent();
@@ -242,7 +242,7 @@ namespace pga{
     };
 
     template <class T> 
-    void pga::ff_population_farm<T>::simulate(int iter){
+    void pga::ff_population_farm<T>::train(int iter){
         //opt.blocking_mode = true;
         this->curr_iterations = 0;
         this->size = this->size;
@@ -267,6 +267,8 @@ namespace pga{
         reprodcution_farm.remove_collector();
 
         ff::ff_Pipe pipe(simulation_farm, reprodcution_farm);
+
+        // ff::optimize_static(pipe, opt);
 
         pipe.wrap_around();
         if (pipe.run_and_wait_end()<0) {

@@ -8,7 +8,7 @@
 #include <math.h> 
 enum normalization { linear, softmax};
 
-#define GET_STATISTICS
+//#define GET_STATISTICS
 #ifdef GET_STATISTICS
 #include <chrono>
 #endif
@@ -55,7 +55,7 @@ namespace pga{
 
         T best_agent(); //return the best agent from the previus simulation
 
-        void virtual simulate(int);
+        void virtual train(int);
         void show_statistics();
 
     };
@@ -127,7 +127,7 @@ One step of simulation.
 4) create the new pool of agent
 */
 template <class T> 
-void pga::population<T>::simulate(int iter){
+void pga::population<T>::train(int iter){
     for(int i = 0; i<iter; i++){
         cum_fitness = 0.0;
         #ifdef GET_STATISTICS
