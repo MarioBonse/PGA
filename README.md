@@ -17,13 +17,22 @@ The second object is the `pga/Population.h` which has three derived classes whic
 
 ## Example
 This framewrok was tested with the tsp problem. you can find the working example on the tsp directory.
-
+To run this example you jave to compile the code and then run it.
+```
+cd tsp
+```
+```
+make
+```
+```
+./build/TSP_ff graph/rat783.tsp config.txt [nw]
+```
 ## Performance
 
 I deeply tested the framework even with a 256 cores server.
 
 
-![](tsp/data/img/xeon_barplot.png)
+![](tsp/data/img/xeon_barplot_1.png)
 
 
 You can see here how well it performs (20x faster than the sequential version with only 32 threads) even if this task's simulation phase takes a small amount of time, therefore even better performance are easly achivable. 
